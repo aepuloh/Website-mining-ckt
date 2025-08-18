@@ -1,250 +1,503 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mining App</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100">
-    <div id="root"></div>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mining — Dark Futuristic</title>
 
-    <script type="text/babel">
-      const { useState, useEffect } = React;
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-      // ===== Login Component =====
-      const Login = ({ onLogin }) => {
-        const [email, setEmail] = useState("");
-        const [password, setPassword] = useState("");
-        const [error, setError] = useState("");
+  <!-- React (UMD) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 
-        const handleLogin = () => {
-          if (!email || !password) {
-            setError("Email dan Password wajib diisi!");
-            return;
-          }
-          if (password.length < 6) {
-            setError("Password minimal 6 karakter!");
-            return;
-          }
-          setError("");
-          onLogin({ name: email, ref: "Self" });
-          window.location.hash = "#/dashboard";
-        };
+  <!-- Babel for JSX in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="bg-white p-8 rounded-2xl shadow-xl w-80">
-              <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-              <button
-                onClick={handleLogin}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-              >
-                Login
-              </button>
-              <p className="mt-4 text-sm text-center">
-                Belum punya akun?{" "}
-                <a href="#/reg" className="text-blue-600">Register</a>
-              </p>
+  <!-- Feather icons (CDN) -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <style>
+    html,body,#root { height:100%; }
+    body {
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(99,102,241,0.12), transparent 6%),
+                  radial-gradient(1200px 600px at 90% 90%, rgba(139,92,246,0.10), transparent 8%),
+                  linear-gradient(180deg, #030417 0%, #0b1020 60%, #071026 100%);
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* glass card */
+    .glass {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+    }
+
+    /* neon glow */
+    .neon {
+      text-shadow: 0 2px 12px rgba(139,92,246,0.18);
+    }
+
+    /* small fade in */
+    .fade-in { animation: fadeIn .36s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* mining ring */
+    .ring-anim { animation: spin 5s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* logs scroll */
+    .log-scroll { max-height: 160px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size: 12px; color: #9fb0ff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+  const { useState, useEffect, useRef } = React;
+
+  /* Helper: safe call feather.replace() if available */
+  function replaceFeather(){
+    try { if (window.feather) window.feather.replace({ 'stroke-width': 1.6, width:16, height:16 }); } catch(e) {}
+  }
+
+  /* Small utility to randomize within range */
+  const rnd = (min, max) => Math.floor(Math.random()*(max-min+1))+min;
+
+  function App(){
+    const [route, setRoute] = useState(window.location.hash.replace('#/','') || 'home');
+    const [user, setUser] = useState(null);
+    const [balance, setBalance] = useState(0);
+    const [unclaimed, setUnclaimed] = useState(0);
+    const [isMining, setIsMining] = useState(false);
+
+    // mining internals
+    const [hashrate, setHashrate] = useState(0);
+    const logsRef = useRef([]);
+    const [,tick] = useState(0); // to force re-render log & hashrate
+
+    // handle hash changes
+    useEffect(() => {
+      const onHash = () => setRoute(window.location.hash.replace('#/','') || 'home');
+      window.addEventListener('hashchange', onHash);
+      replaceFeather();
+      return () => window.removeEventListener('hashchange', onHash);
+    }, []);
+
+    // ensure icons render whenever UI updates
+    useEffect(() => { replaceFeather(); });
+
+    // mining loop: simulate realistic mining behavior
+    useEffect(() => {
+      let hrInterval = null;
+      let msgInterval = null;
+      let rewardInterval = null;
+
+      if (isMining){
+        // initial connection sequence
+        addLog('Connecting to mining pool...');
+        setTimeout(()=> addLog('Connection established — mining started'), 1200);
+
+        // dynamic hashrate fluctuates
+        hrInterval = setInterval(()=>{
+          setHashrate( (prev) => {
+            const next = Math.max(20, Math.round((Math.random()*40) + 80)); // around 80-120 H/s
+            return next;
+          });
+          // re-render
+          tick(n=>n+1);
+        }, 1100);
+
+        // logs: every ~2.5-4s produce a log line
+        msgInterval = setInterval(()=>{
+          const actions = [
+            'Accepted share +1',
+            'Found block candidate',
+            'Difficulty adjusted',
+            'Share submitted +1',
+            'Pool ping ok',
+            'Block found! submitting...',
+          ];
+          const sample = actions[Math.floor(Math.random()*actions.length)];
+          addLog(`[${timeNow()}] ${sample}`);
+        }, rnd(2400,3800));
+
+        // reward accrual: add small amount every second (unclaimed)
+        rewardInterval = setInterval(()=>{
+          setUnclaimed(u => {
+            const inc = +( (hashrate/100000) * (Math.random()*0.6 + 0.6) ).toFixed(6); // pseudo formula
+            return +(u + inc).toFixed(6);
+          });
+        }, 1000);
+      }
+
+      return () => {
+        clearInterval(hrInterval);
+        clearInterval(msgInterval);
+        clearInterval(rewardInterval);
+      };
+    }, [isMining, hashrate]);
+
+    // helper: push new log (keeps max 40 lines)
+    function addLog(text){
+      logsRef.current.unshift(text);
+      if (logsRef.current.length > 80) logsRef.current.length = 80;
+      tick(n=>n+1);
+    }
+
+    function timeNow(){
+      const d = new Date();
+      return d.toLocaleTimeString();
+    }
+
+    // Start mining flow with connection effect
+    function handleStartMining(){
+      if(!user) return alert('Login dulu ya');
+      setIsMining(true);
+      setHashrate(rnd(85,140));
+      addLog(`[${timeNow()}] Initializing miner...`);
+    }
+
+    function handleStopMining(){
+      setIsMining(false);
+      setHashrate(0);
+      addLog(`[${timeNow()}] Mining stopped by user.`);
+    }
+
+    function handleClaim(){
+      if (unclaimed <= 0) return;
+      setBalance(b => +(b + unclaimed).toFixed(6));
+      addLog(`[${timeNow()}] Claimed ${unclaimed.toFixed(6)} NKT to wallet.`);
+      setUnclaimed(0);
+    }
+
+    // simple register/login forms
+    function handleRegister(name, pass, ref) {
+      setUser({ name, ref: ref || 'NoRef' });
+      setBalance(0);
+      setUnclaimed(0);
+      window.location.hash = '#/dashboard';
+      addLog(`[${timeNow()}] Account created: ${name}`);
+    }
+    function handleLogin(email, pass) {
+      setUser({ name: email, ref: 'Self' });
+      window.location.hash = '#/dashboard';
+      addLog(`[${timeNow()}] Login: ${email}`);
+    }
+
+    // components for tabs
+    return (
+      <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="py-4 px-4 sm:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center ring-1 ring-white/6 shadow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2 L15 8 L22 9 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9 L9 8 Z" fill="#fff" opacity="0.9"/></svg>
+            </div>
+            <div>
+              <div className="text-sm text-slate-300 uppercase tracking-wide">Nickt — Lite</div>
+              <div className="text-white text-lg font-semibold neon">Cloud Mining Dashboard</div>
             </div>
           </div>
-        );
-      };
 
-      // ===== Register Component =====
-      const Register = ({ onRegister }) => {
-        const [username, setUsername] = useState("");
-        const [password, setPassword] = useState("");
-        const [error, setError] = useState("");
-
-        const handleRegister = () => {
-          if (!username || !password) {
-            setError("Username dan Password wajib diisi!");
-            return;
-          }
-          if (password.length < 6) {
-            setError("Password minimal 6 karakter!");
-            return;
-          }
-          setError("");
-          const params = new URLSearchParams(window.location.hash.split("?")[1]);
-          const ref = params.get("ref") || "NoRef";
-          onRegister({ name: username, ref });
-          window.location.hash = "#/dashboard";
-        };
-
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="bg-white p-8 rounded-2xl shadow-xl w-80">
-              <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full mb-2 p-2 border rounded"
-              />
-              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-              <button
-                onClick={handleRegister}
-                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-              >
-                Register
-              </button>
-              <p className="mt-4 text-sm text-center">
-                Sudah punya akun?{" "}
-                <a href="#/login" className="text-blue-600">Login</a>
-              </p>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-slate-300">Balance</div>
+            <div className="px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-700 to-purple-700 text-white font-semibold">
+              {balance.toFixed(6)} NKT
             </div>
+            {user ? (
+              <div className="px-3 py-2 rounded-lg bg-white/5 text-sm">{user.name}</div>
+            ) : (
+              <a href="#/login" className="px-3 py-2 bg-indigo-600 rounded-lg text-white">Masuk</a>
+            )}
           </div>
-        );
-      };
+        </header>
 
-      // ===== Dashboard Component =====
-      const Dashboard = ({ user }) => {
-        const [mining, setMining] = useState(false);
-        const [progress, setProgress] = useState(0);
-        const [unclaimed, setUnclaimed] = useState(0);
-        const [balance, setBalance] = useState(0);
-
-        useEffect(() => {
-          let interval;
-          if (mining && progress < 100) {
-            interval = setInterval(() => {
-              setProgress((prev) => (prev < 100 ? prev + 2 : 100));
-            }, 200);
-          }
-          return () => clearInterval(interval);
-        }, [mining, progress]);
-
-        const startMining = () => {
-          setMining(true);
-          setProgress(0);
-          setUnclaimed(0);
-        };
-
-        const stopMining = () => {
-          setMining(false);
-          setUnclaimed(0.01); // contoh reward
-        };
-
-        const claimReward = () => {
-          setBalance((b) => b + unclaimed);
-          setUnclaimed(0);
-        };
-
-        return (
-          <div className="p-6 pb-24">
-            <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
-              
-              {/* Balance */}
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner mb-4">
-                <p className="text-lg">Balance:</p>
-                <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
-              </div>
-
-              {/* Mining Animation */}
-              {mining && (
-                <div className="mb-4">
-                  <div className="flex justify-center items-center mb-2">
-                    <div className="animate-bounce text-4xl">⚡</div>
-                    <div className="animate-spin text-3xl ml-2">⛏️</div>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div
-                      className="bg-green-500 h-3 transition-all duration-200"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-gray-600">{progress}% Mining...</p>
+        {/* Main content */}
+        <main className="flex-1 p-4 sm:p-6">
+          {route === 'home' && (
+            <section className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="glass p-6 rounded-2xl fade-in">
+                <h2 className="text-2xl font-bold neon">Selamat Datang</h2>
+                <p className="mt-2 text-slate-300">Bentuk tim dan hasilkan uang bersama. UI ini dibuat agar terasa seperti dashboard mining nyata.</p>
+                <div className="mt-6 flex gap-3">
+                  <a className="bg-indigo-600 py-2 px-4 rounded-lg hover:scale-[1.02] transition text-white" href="#/dashboard">Buka Dashboard</a>
+                  <a className="py-2 px-4 rounded-lg border border-white/6 text-slate-200" href="#/reg">Daftar</a>
                 </div>
-              )}
-
-              {/* Buttons */}
-              {!mining && unclaimed === 0 && (
-                <button
-                  onClick={startMining}
-                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-green-600 hover:bg-green-700 text-white"
-                >
-                  ⚡ Start Mining
-                </button>
-              )}
-
-              {mining && (
-                <button
-                  onClick={stopMining}
-                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-red-600 hover:bg-red-700 text-white"
-                >
-                  ⛔ Stop Mining
-                </button>
-              )}
-
-              {!mining && unclaimed > 0 && (
-                <button
-                  onClick={claimReward}
-                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-yellow-500 hover:bg-yellow-600 text-white"
-                >
-                  🎁 Claim {unclaimed.toFixed(3)} NKT
-                </button>
-              )}
-
-              {/* Referral */}
-              <div className="mt-6">
-                <h3 className="font-semibold">Referral Link:</h3>
-                <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
-                  {window.location.origin + "#/reg?ref=" + user.name}
-                </p>
               </div>
-            </div>
-          </div>
-        );
-      };
 
-      // ===== App Router =====
-      const App = () => {
-        const [user, setUser] = useState(null);
-        const [route, setRoute] = useState(window.location.hash);
+              <div className="glass p-6 rounded-2xl fade-in">
+                <h3 className="text-lg font-semibold neon">Quick Stats</h3>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white/3 rounded">
+                    <div className="text-xs text-slate-300">Active Miners</div>
+                    <div className="text-xl font-bold">5,231</div>
+                  </div>
+                  <div className="p-3 bg-white/3 rounded">
+                    <div className="text-xs text-slate-300">Network Hashrate</div>
+                    <div className="text-xl font-bold">1.2 GH/s</div>
+                  </div>
+                  <div className="p-3 bg-white/3 rounded">
+                    <div className="text-xs text-slate-300">Daily Avg</div>
+                    <div className="text-xl font-bold">0.045 NKT</div>
+                  </div>
+                  <div className="p-3 bg-white/3 rounded">
+                    <div className="text-xs text-slate-300">Referral Bonus</div>
+                    <div className="text-xl font-bold">0.010 NKT</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
-        useEffect(() => {
-          const onHashChange = () => setRoute(window.location.hash);
-          window.addEventListener("hashchange", onHashChange);
-          return () => window.removeEventListener("hashchange", onHashChange);
-        }, []);
+          {route === 'dashboard' && (
+            <section className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left: mining card */}
+              <div className="lg:col-span-2 glass p-6 rounded-2xl fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <div className="text-sm text-slate-300">Mining Status</div>
+                    <div className="text-2xl font-bold neon">{ isMining ? 'Mining — connected' : 'Idle' }</div>
+                  </div>
+                  <div className="text-sm text-slate-300">
+                    <div>Hashrate</div>
+                    <div className="text-xl font-mono font-bold">{ isMining ? `${hashrate} H/s` : '—' }</div>
+                  </div>
+                </div>
 
-        if (!user) {
-          if (route.startsWith("#/reg")) return <Register onRegister={setUser} />;
-          return <Login onLogin={setUser} />;
-        }
+                {/* Ring + Balance */}
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="relative w-40 h-40 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border border-white/6 ring-4 ring-indigo-700/25"></div>
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex flex-col items-center justify-center text-white shadow-lg">
+                      <div className="text-sm opacity-80">UNCLAIMED</div>
+                      <div className="text-2xl font-bold">{unclaimed.toFixed(6)}</div>
+                    </div>
+                    {isMining && <div className="absolute -bottom-2 right-2 w-12 h-12 rounded-full bg-indigo-600/60 flex items-center justify-center ring-1 ring-white/10 ring-offset-2 ring-offset-transparent ring-indigo-400/10 ring-inset animate-pulse"><i data-feather="zap" /></div>}
+                  </div>
 
-        return <Dashboard user={user} />;
-      };
+                  <div className="flex-1">
+                    <div className="bg-white/3 p-4 rounded-lg mb-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xs text-slate-300">Wallet Balance</div>
+                          <div className="text-2xl font-bold">{balance.toFixed(6)} NKT</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-slate-300">Est. / hr</div>
+                          <div className="text-lg font-bold">{ ( (hashrate||100) * 0.00001 ).toFixed(6) } NKT</div>
+                        </div>
+                      </div>
+                    </div>
 
-      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-    </script>
-  </body>
+                    {/* Mining controls */}
+                    <div className="flex gap-3">
+                      {!isMining && (
+                        <button onClick={()=>handleStart()} className="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-black font-semibold" id="startBtn">
+                          <i data-feather="play" className="inline mr-2" /> Start
+                        </button>
+                      )}
+                      {isMining && (
+                        <button onClick={() => { setIsMining(false); handleStopMining(); }} className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold">
+                          <i data-feather="stop" className="inline mr-2" /> Stop
+                        </button>
+                      )}
+                      <button onClick={() => { if (unclaimed>0) handleClaim(); }} className="py-3 px-4 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-semibold" disabled={unclaimed<=0}>
+                        <i data-feather="gift" className="inline mr-2" /> Claim
+                      </button>
+                    </div>
+
+                    {/* progress & info */}
+                    <div className="mt-4">
+                      <div className="w-full bg-white/6 h-2 rounded-full overflow-hidden">
+                        <div style={{ width: `${Math.min(100, (unclaimed*1000))}%` }} className="h-2 bg-gradient-to-r from-green-400 to-green-600 transition-all"></div>
+                      </div>
+                      <div className="mt-2 text-xs text-slate-400">Progress visual (representative)</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* logs */}
+                <div className="mt-6 bg-black/60 p-3 rounded text-sm log-scroll">
+                  <div className="text-xs text-slate-400 mb-2">Activity Log</div>
+                  { logsRef.current.length === 0 ? <div className="text-slate-500">No activity yet — tekan Start untuk memulai mining</div> : null}
+                  <div>
+                    { logsRef.current.map((l,idx) => (
+                      <div key={idx} className="py-0.5">{l}</div>
+                    )) }
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column: wallet + profile quick */}
+              <aside className="glass p-4 rounded-2xl fade-in">
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400">Quick Wallet</div>
+                  <div className="mt-2 text-lg font-bold">{balance.toFixed(6)} NKT</div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="text-xs text-slate-400">Referral</div>
+                  <div className="mt-2 text-sm bg-white/5 p-2 rounded break-words">{ user ? `${window.location.origin}#/reg?ref=${encodeURIComponent(user.name)}` : '-' }</div>
+                </div>
+
+                <div className="text-xs text-slate-400">Account</div>
+                <div className="mt-2 bg-white/3 p-3 rounded">
+                  <div className="font-medium">{ user ? user.name : 'Guest' }</div>
+                  <div className="text-xs text-slate-400 mt-1">{ user ? `Ref: ${user.ref}` : '' }</div>
+                </div>
+              </aside>
+            </section>
+          )}
+
+          {route === 'wallet' && (
+            <section className="max-w-5xl mx-auto">
+              <div className="glass p-6 rounded-2xl">
+                <h3 className="text-lg font-bold neon">Wallet</h3>
+                <div className="mt-4">
+                  <div className="text-sm text-slate-300">Total Balance</div>
+                  <div className="text-2xl font-bold">{balance.toFixed(6)} NKT</div>
+                </div>
+                <div className="mt-6">
+                  <h4 className="text-sm text-slate-300">History (dummy)</h4>
+                  <ul className="mt-3 text-sm text-slate-400 space-y-2">
+                    <li>+0.010 NKT — Referral reward</li>
+                    <li>+0.005 NKT — Bonus harian</li>
+                    <li>-0.020 NKT — Withdraw (demo)</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {route === 'profile' && (
+            <section className="max-w-5xl mx-auto">
+              <div className="glass p-6 rounded-2xl">
+                <h3 className="text-lg font-bold neon">Profil</h3>
+                <div className="mt-4">
+                  <div className="text-sm text-slate-300">Nama</div>
+                  <div className="text-xl font-medium">{ user ? user.name : '-' }</div>
+
+                  <div className="mt-3 text-sm text-slate-300">Referral Link</div>
+                  <div className="mt-2 text-sm bg-white/5 p-2 rounded break-words">{user ? `${window.location.origin}#/reg?ref=${encodeURIComponent(user.name)}` : '-'}</div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {route === 'reg' && (
+            <section className="max-w-md mx-auto">
+              <RegisterForm onRegister={handleRegister} />
+            </section>
+          )}
+
+          {route === 'login' && (
+            <section className="max-w-md mx-auto">
+              <LoginForm onLogin={handleLogin} />
+            </section>
+          )}
+        </main>
+
+        {/* Bottom Tab Bar */}
+        <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-black/40 backdrop-blur rounded-full shadow-lg border border-white/6 px-4 py-3 flex justify-around items-center">
+          <a href="#/home" className={`flex flex-col items-center text-xs ${route==='home' ? 'text-indigo-300' : 'text-slate-400'}`}><i data-feather="home"></i><span className="mt-1">Home</span></a>
+          <a href="#/dashboard" className={`flex flex-col items-center text-xs ${route==='dashboard' ? 'text-indigo-300' : 'text-slate-400'}`}><i data-feather="cpu"></i><span className="mt-1">Mining</span></a>
+          <a href="#/wallet" className={`flex flex-col items-center text-xs ${route==='wallet' ? 'text-indigo-300' : 'text-slate-400'}`}><i data-feather="credit-card"></i><span className="mt-1">Wallet</span></a>
+          <a href="#/profile" className={`flex flex-col items-center text-xs ${route==='profile' ? 'text-indigo-300' : 'text-slate-400'}`}><i data-feather="user"></i><span className="mt-1">Profile</span></a>
+        </nav>
+      </div>
+    );
+
+    // helper wrappers to integrate feather & local handlers for start/stop/claim
+    function handleStart() {
+      // find App root React instance? We'll just dispatch custom event used below
+      window.dispatchEvent(new CustomEvent('app-start-mining'));
+    }
+    function handleStopMining() {
+      window.dispatchEvent(new CustomEvent('app-stop-mining'));
+    }
+    function handleClaim() {
+      window.dispatchEvent(new CustomEvent('app-claim'));
+    }
+  }
+
+  // Simple register & login small forms as components (separate to keep App tidy)
+  function RegisterForm({ onRegister }){
+    const [name,setName] = useState('');
+    const [password,setPassword] = useState('');
+    const [ref,setRef] = useState('');
+    const [err,setErr] = useState('');
+    useEffect(()=> replaceFeather(),[]);
+    function submit(){
+      if(!name || !password){ setErr('Isi nama dan password'); return; }
+      if(password.length<6){ setErr('Password minimal 6 karakter'); return; }
+      onRegister(name, password, ref);
+    }
+    return (
+      <div className="p-6 glass rounded-2xl mt-8">
+        <h3 className="text-lg font-bold mb-3">Register</h3>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Username" className="w-full mb-2 p-2 bg-black/20 rounded" />
+        <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" className="w-full mb-2 p-2 bg-black/20 rounded" />
+        <input value={ref} onChange={e=>setRef(e.target.value)} placeholder="Referral (opsional)" className="w-full mb-2 p-2 bg-black/20 rounded" />
+        {err && <div className="text-red-400 text-sm mb-2">{err}</div>}
+        <div className="flex gap-2">
+          <button onClick={submit} className="flex-1 py-2 bg-indigo-600 rounded">Daftar</button>
+          <a href="#/login" className="py-2 px-3 border rounded self-center">Login</a>
+        </div>
+      </div>
+    );
+  }
+
+  function LoginForm({ onLogin }){
+    const [email,setEmail]=useState('');
+    const [pw,setPw]=useState('');
+    const [err,setErr]=useState('');
+    useEffect(()=> replaceFeather(),[]);
+    function submit(){
+      if(!email || !pw){ setErr('Isi email dan password'); return; }
+      if(pw.length<6){ setErr('Password minimal 6 karakter'); return; }
+      onLogin(email,pw);
+    }
+    return (
+      <div className="p-6 glass rounded-2xl mt-8">
+        <h3 className="text-lg font-bold mb-3">Login</h3>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full mb-2 p-2 bg-black/20 rounded" />
+        <input value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password" type="password" className="w-full mb-2 p-2 bg-black/20 rounded" />
+        {err && <div className="text-red-400 text-sm mb-2">{err}</div>}
+        <div className="flex gap-2">
+          <button onClick={submit} className="flex-1 py-2 bg-blue-600 rounded">Login</button>
+          <a href="#/reg" className="py-2 px-3 border rounded self-center">Register</a>
+        </div>
+      </div>
+    );
+  }
+
+  // Mount root and wire cross-component simple events for start/stop/claim:
+  (function mount(){
+    const root = document.getElementById('root');
+    ReactDOM.createRoot(root).render(React.createElement(App));
+
+    // wire events to update App state — we'll forward as DOM events and handle inside React by listening.
+    // Because App closure used inner handlers, we'll implement minimal forwarding:
+    window.addEventListener('app-start-mining', ()=>{
+      // find first React root and dispatch custom DOM event for start
+      const ev = new CustomEvent('start-mining-internal');
+      window.dispatchEvent(ev);
+    });
+    window.addEventListener('app-stop-mining', ()=>{
+      const ev = new CustomEvent('stop-mining-internal');
+      window.dispatchEvent(ev);
+    });
+    window.addEventListener('app-claim', ()=>{
+      const ev = new CustomEvent('claim-internal');
+      window.dispatchEvent(ev);
+    });
+  })();
+
+  </script>
+</body>
 </html>
