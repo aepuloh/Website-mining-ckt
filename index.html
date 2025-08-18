@@ -7,30 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet" />
   <style>
-    /* Profil lebih rapih & sempit */
-.profile-box {
-  max-width: 20rem;     /* Lebar maksimal kotak */
-  margin: auto;
-  font-size: 0.85rem;   /* kecilkan font */
-}
-.profile-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255,255,255,0.05);
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.8rem;
-}
-.profile-value {
-  min-width: 0;
-  max-width: 11rem;       /* biar ga kepanjangan */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: right;
-}
     body {
       background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
       color: #fff;
@@ -62,6 +38,30 @@
     .icon-input { display:flex; align-items:center; background:#111827; border-radius:.5rem; padding:0 .75rem; }
     .icon-input input { flex:1; padding:.75rem; background:#111827; color:#fff; text-align:center; outline:none; }
     .btn { width:100%; font-weight:700; padding:.5rem 1rem; border-radius:.75rem; transition:all .3s; }
+    /* === PROFILE STYLING === */
+.profile-box {
+  max-width: 20rem;     /* Lebar maksimal kotak */
+  margin: auto;
+  font-size: 0.85rem;   /* kecilkan font */
+}
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.profile-value {
+  min-width: 0;
+  max-width: 11rem;       /* batasi panjang value */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* bikin ... kalau terlalu panjang */
+  text-align: right;
+}
   </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -88,7 +88,26 @@
         <i class="lucide-lock-keyhole w-5 h-5 text-cyan-400"></i>
         <input id="password" type="password" placeholder="Kata Sandi" />
       </div>
+<!-- Profile Screen -->
+<div id="profileScreen" class="hidden h-screen flex items-center justify-center">
+  <div class="glass rounded-xl p-4 profile-box">
+    <h2 class="text-cyan-400 font-semibold text-center mb-3">Profile</h2>
 
+    <div class="profile-row">
+      <span>Email</span>
+      <span class="profile-value">airdropshunterid@gmail.com</span>
+    </div>
+
+    <div class="profile-row">
+      <span>Username</span>
+      <span class="profile-value">Aepuloh</span>
+    </div>
+
+    <button class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg w-full mt-3">
+      Logout
+    </button>
+  </div>
+</div>
       <!-- Captcha -->
       <div class="mb-4">
         <div class="flex items-center justify-between gap-2">
