@@ -60,55 +60,55 @@
 
       // === Pages ===
       const Landing = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl text-center w-96">
-            <h1 className="text-3xl font-bold mb-4 text-indigo-700">💎 Mining App</h1>
-            <p className="mb-6 text-gray-600">Bentuk tim Anda dan hasilkan uang bersama!</p>
-            <a href="#/reg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl w-full font-semibold block mb-3">Register</a>
-            <a href="#/login" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl w-full font-semibold block">Login</a>
+        <div className="flex items-center justify-center h-screen px-4">
+          <div className="bg-white/10 backdrop-blur-lg text-white p-8 rounded-2xl shadow-2xl text-center w-full max-w-sm animate-fadeIn">
+            <h1 className="text-4xl font-extrabold mb-4">💎 Mining App</h1>
+            <p className="mb-6 text-gray-200">Bentuk tim Anda dan hasilkan uang bersama!</p>
+            <a href="#/reg" className="bg-indigo-500 hover:bg-indigo-600 transition px-6 py-3 rounded-xl w-full font-semibold block mb-3">Register</a>
+            <a href="#/login" className="bg-green-500 hover:bg-green-600 transition px-6 py-3 rounded-xl w-full font-semibold block">Login</a>
           </div>
         </div>
       );
 
       const Register = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
+        <div className="flex items-center justify-center h-screen px-4">
+          <div className="bg-white/10 backdrop-blur-lg text-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center animate-fadeIn">
             <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
-            <button onClick={register} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Register Sekarang</button>
+            <button onClick={register} className="bg-indigo-500 hover:bg-indigo-600 transition text-white px-4 py-2 rounded-lg w-full font-semibold">Register Sekarang</button>
           </div>
         </div>
       );
 
       const Login = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
+        <div className="flex items-center justify-center h-screen px-4">
+          <div className="bg-white/10 backdrop-blur-lg text-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center animate-fadeIn">
             <h1 className="text-2xl font-bold mb-4">Login</h1>
-            <button onClick={login} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Login</button>
+            <button onClick={login} className="bg-green-500 hover:bg-green-600 transition text-white px-4 py-2 rounded-lg w-full font-semibold">Login</button>
           </div>
         </div>
       );
 
       const Dashboard = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+        <div className="p-6 pb-24 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-xl p-6 max-w-md mx-auto">
             <h1 className="text-2xl font-bold mb-2">Dashboard Mining</h1>
-            <p className="text-sm mb-4">Selamat datang, {user.name} (Ref: {user.ref})</p>
+            <p className="text-sm mb-4 text-gray-200">Selamat datang, {user.name} (Ref: {user.ref})</p>
             
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner text-center">
               <p className="text-lg">Balance:</p>
-              <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
+              <h2 className="text-3xl font-extrabold">{balance.toFixed(3)} NKT</h2>
             </div>
 
             <button
               onClick={() => setMining(!mining)}
-              className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${mining ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white`}
+              className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg transition ${mining ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} text-white`}
             >
               {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
             </button>
 
             <div className="mt-6">
               <h3 className="font-semibold">Referral Link:</h3>
-              <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
+              <p className="text-sm break-all bg-white/20 text-gray-100 p-2 rounded mt-2">
                 {window.location.origin + "#/reg?ref=" + user.name}
               </p>
             </div>
@@ -117,27 +117,27 @@
       );
 
       const Team = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+        <div className="p-6 pb-24 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-xl p-6 max-w-md mx-auto">
             <h1 className="text-2xl font-bold mb-4">👥 Tim Saya</h1>
-            <p className="text-gray-600">Belum ada anggota tim.</p>
+            <p className="text-gray-200">Belum ada anggota tim.</p>
           </div>
         </div>
       );
 
       const Wallet = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+        <div className="p-6 pb-24 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-xl p-6 max-w-md mx-auto">
             <h1 className="text-2xl font-bold mb-4">💰 Dompet</h1>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full mb-3">Deposit</button>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full">Withdraw</button>
+            <button className="bg-indigo-500 hover:bg-indigo-600 transition text-white px-4 py-2 rounded-lg w-full mb-3">Deposit</button>
+            <button className="bg-green-500 hover:bg-green-600 transition text-white px-4 py-2 rounded-lg w-full">Withdraw</button>
           </div>
         </div>
       );
 
       const Profile = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
+        <div className="p-6 pb-24 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-lg text-white rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
             <h1 className="text-2xl font-bold mb-4">👤 Profil</h1>
             <p className="mb-2">Nama: {user?.name}</p>
             <p>Referral: {user?.ref}</p>
@@ -147,12 +147,12 @@
 
       // === Bottom Nav ===
       const BottomNav = () => (
-        <div className="fixed bottom-0 left-0 right-0 bg-white text-gray-700 flex justify-around py-3 shadow-inner">
-          <a href="#/home" className={`flex flex-col items-center ${route==="#/home"?"text-indigo-600":"text-gray-600"}`}>🏠<span className="text-xs">Home</span></a>
-          <a href="#/dashboard" className={`flex flex-col items-center ${route==="#/dashboard"?"text-indigo-600":"text-gray-600"}`}>⚡<span className="text-xs">Mining</span></a>
-          <a href="#/team" className={`flex flex-col items-center ${route==="#/team"?"text-indigo-600":"text-gray-600"}`}>👥<span className="text-xs">Team</span></a>
-          <a href="#/wallet" className={`flex flex-col items-center ${route==="#/wallet"?"text-indigo-600":"text-gray-600"}`}>💰<span className="text-xs">Wallet</span></a>
-          <a href="#/profile" className={`flex flex-col items-center ${route==="#/profile"?"text-indigo-600":"text-gray-600"}`}>👤<span className="text-xs">Profile</span></a>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/20 backdrop-blur-md text-white flex justify-around py-3 shadow-inner">
+          <a href="#/home" className={`flex flex-col items-center ${route==="#/home"?"text-yellow-300":"text-gray-300"}`}>🏠<span className="text-xs">Home</span></a>
+          <a href="#/dashboard" className={`flex flex-col items-center ${route==="#/dashboard"?"text-yellow-300":"text-gray-300"}`}>⚡<span className="text-xs">Mining</span></a>
+          <a href="#/team" className={`flex flex-col items-center ${route==="#/team"?"text-yellow-300":"text-gray-300"}`}>👥<span className="text-xs">Team</span></a>
+          <a href="#/wallet" className={`flex flex-col items-center ${route==="#/wallet"?"text-yellow-300":"text-gray-300"}`}>💰<span className="text-xs">Wallet</span></a>
+          <a href="#/profile" className={`flex flex-col items-center ${route==="#/profile"?"text-yellow-300":"text-gray-300"}`}>👤<span className="text-xs">Profile</span></a>
         </div>
       );
 
