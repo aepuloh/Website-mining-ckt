@@ -3,167 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crypto Mining App</title>
+  <title>Test App</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet" />
   <style>
-    body {
-      background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden;
-    }
-    .glass {
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-    .glow {
-      text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
-    }
-    .card-3d {
-      transform-style: preserve-3d;
-      transition: transform 0.6s ease;
-    }
-    .card-3d:hover {
-      transform: rotateY(10deg) rotateX(10deg) scale(1.03);
-    }
-    .fade-in {
-      animation: fadeIn 0.8s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .icon-input { display:flex; align-items:center; background:#111827; border-radius:.5rem; padding:0 .75rem; }
-    .icon-input input { flex:1; padding:.75rem; background:#111827; color:#fff; text-align:center; outline:none; }
-    .btn { width:100%; font-weight:700; padding:.5rem 1rem; border-radius:.75rem; transition:all .3s; }
-
-    /* --- Profile style rapih --- */
-    .profile-box {
-      max-width: 20rem;     
-      margin: auto;
-      font-size: 0.85rem;
-    }
-    .profile-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255,255,255,0.05);
-      border-radius: 0.5rem;
-      padding: 0.4rem 0.75rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.8rem;
-    }
-    .profile-value {
-      min-width: 0;
-      max-width: 11rem;    
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis; 
-      text-align: right;
-    }
+    body { background:#0f0f1a; color:#fff; font-family:sans-serif; }
+    .glass { background:rgba(255,255,255,0.06); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); }
+    .profile-box { max-width:20rem; margin:auto; font-size:.85rem; }
+    .profile-row { display:flex; justify-content:space-between; padding:.4rem .75rem; margin-bottom:.5rem; background:rgba(255,255,255,0.05); border-radius:.5rem; }
+    .profile-value { max-width:11rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
   </style>
 </head>
 <body class="h-screen flex flex-col">
 
-  <!-- Login Screen -->
+  <!-- Login -->
   <div id="loginScreen" class="flex flex-col items-center justify-center h-screen">
-    <div class="glass card-3d rounded-2xl p-8 w-[26rem] max-w-[90vw] text-center shadow-2xl fade-in">
-      <div class="flex items-center justify-center gap-2 mb-6">
-        <i class="lucide-cpu w-7 h-7 text-cyan-400"></i>
-        <h1 class="text-3xl font-extrabold glow">Crypto Miner</h1>
-      </div>
-
-      <div class="icon-input mb-3">
-        <i class="lucide-mail w-5 h-5 text-cyan-400"></i>
-        <input id="email" type="email" placeholder="Email" />
-      </div>
-
-      <div class="icon-input mb-3">
-        <i class="lucide-user w-5 h-5 text-cyan-400"></i>
-        <input id="username" type="text" placeholder="Username" />
-      </div>
-
-      <div class="icon-input mb-4">
-        <i class="lucide-lock-keyhole w-5 h-5 text-cyan-400"></i>
-        <input id="password" type="password" placeholder="Kata sandi" />
-      </div>
-
-      <button onclick="login()" class="btn bg-cyan-500 hover:bg-cyan-600 text-white">Login</button>
+    <div class="glass rounded-xl p-6 w-80 text-center">
+      <h1 class="text-xl font-bold mb-4">Crypto Miner</h1>
+      <input id="email" type="email" placeholder="Email" class="mb-2 w-full p-2 rounded text-black" />
+      <input id="username" type="text" placeholder="Username" class="mb-2 w-full p-2 rounded text-black" />
+      <input id="password" type="password" placeholder="Password" class="mb-4 w-full p-2 rounded text-black" />
+      <button onclick="login()" class="bg-cyan-500 w-full py-2 rounded text-white">Login</button>
     </div>
   </div>
 
-  <!-- Main App -->
+  <!-- App -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
-    <!-- Pages -->
     <div id="homePage" class="flex-1 flex items-center justify-center">Home Page</div>
-    <div id="walletPage" class="hidden flex-1 flex items-center justify-center">Wallet Page</div>
-    <div id="teamPage" class="hidden flex-1 flex items-center justify-center">Team Page</div>
     <div id="profilePage" class="hidden flex-1 flex items-center justify-center">
       <div class="glass rounded-xl p-4 profile-box">
         <h2 class="text-cyan-400 font-semibold text-center mb-3">Profile</h2>
-
-        <div class="profile-row">
-          <span>Email</span>
-          <span class="profile-value" id="profileEmail"></span>
-        </div>
-
-        <div class="profile-row">
-          <span>Username</span>
-          <span class="profile-value" id="profileUsername"></span>
-        </div>
-
-        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg w-full mt-3">
-          Logout
-        </button>
+        <div class="profile-row"><span>Email</span><span class="profile-value" id="profileEmail"></span></div>
+        <div class="profile-row"><span>Username</span><span class="profile-value" id="profileUsername"></span></div>
+        <button onclick="logout()" class="bg-red-500 w-full py-2 rounded mt-3">Logout</button>
       </div>
     </div>
 
-    <!-- Bottom Tab Bar -->
+    <!-- Tab -->
     <div class="glass flex justify-around py-3">
-      <button onclick="showPage('homePage')" class="text-cyan-400"><i class="lucide-home"></i></button>
-      <button onclick="showPage('walletPage')" class="text-cyan-400"><i class="lucide-wallet"></i></button>
-      <button onclick="showPage('teamPage')" class="text-cyan-400"><i class="lucide-users"></i></button>
-      <button onclick="showPage('profilePage')" class="text-cyan-400"><i class="lucide-user"></i></button>
+      <button onclick="showPage('homePage')" class="text-cyan-400">🏠</button>
+      <button onclick="showPage('profilePage')" class="text-cyan-400">👤</button>
     </div>
   </div>
 
   <script>
-    function login() {
-      const email = document.getElementById("email").value;
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-
-      if (email && username && password) {
-        localStorage.setItem("email", email);
-        localStorage.setItem("username", username);
-
+    function login(){
+      const email=document.getElementById("email").value;
+      const username=document.getElementById("username").value;
+      const pass=document.getElementById("password").value;
+      if(email && username && pass){
+        localStorage.setItem("email",email);
+        localStorage.setItem("username",username);
         document.getElementById("loginScreen").classList.add("hidden");
         document.getElementById("mainApp").classList.remove("hidden");
-
-        document.getElementById("profileEmail").innerText = email;
-        document.getElementById("profileUsername").innerText = username;
-      } else {
-        alert("Lengkapi semua field!");
-      }
+        document.getElementById("profileEmail").innerText=email;
+        document.getElementById("profileUsername").innerText=username;
+      } else { alert("Lengkapi semua field!"); }
     }
-
-    function logout() {
+    function logout(){
       localStorage.clear();
       document.getElementById("mainApp").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
     }
-
-    function showPage(pageId) {
-      ["homePage","walletPage","teamPage","profilePage"].forEach(id => {
-        document.getElementById(id).classList.add("hidden");
-      });
-      document.getElementById(pageId).classList.remove("hidden");
-
-      if (pageId === "profilePage") {
-        document.getElementById("profileEmail").innerText = localStorage.getItem("email") || "";
-        document.getElementById("profileUsername").innerText = localStorage.getItem("username") || "";
+    function showPage(page){
+      ["homePage","profilePage"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+      document.getElementById(page).classList.remove("hidden");
+      if(page==="profilePage"){
+        document.getElementById("profileEmail").innerText=localStorage.getItem("email")||"";
+        document.getElementById("profileUsername").innerText=localStorage.getItem("username")||"";
       }
     }
   </script>
