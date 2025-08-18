@@ -1,120 +1,158 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crypto Mining App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire-Mining</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      color: white;
+      font-family: sans-serif;
     }
+    .hidden { display: none; }
     .glass {
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
     }
-    .glow {
-      text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
+    /* 🔹 Styling profil kecil */
+    #profilePage {
+      font-size: 0.85rem;
     }
-    .profile-box { width: 18rem; font-size: 0.85rem; }
-    .profile-row { display:flex; justify-content:space-between; margin-bottom:0.5rem; }
-    .profile-value { max-width: 10rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
+    #profilePage .glass {
+      max-width: 20rem;
+      margin: auto;
+      padding: 1rem;
+    }
+    #profilePage h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    #profilePage p {
+      font-size: 0.75rem;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body class="h-screen flex flex-col">
 
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen" class="flex flex-col items-center justify-center h-screen">
-    <div class="glass rounded-xl p-6 w-80 text-center">
-      <h1 class="text-2xl font-bold glow mb-4">Crypto Miner</h1>
-
-      <input id="email" type="email" placeholder="Email" class="mb-2 w-full p-2 rounded text-black" />
-      <input id="username" type="text" placeholder="Username" class="mb-2 w-full p-2 rounded text-black" />
-      <input id="password" type="password" placeholder="Password" class="mb-2 w-full p-2 rounded text-black" />
-
+  <!-- 🔹 LOGIN SCREEN -->
+  <div id="loginScreen" class="h-screen flex items-center justify-center">
+    <div class="glass p-6 rounded-xl w-80">
+      <h2 class="text-xl font-bold text-center mb-4">Login</h2>
+      <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-2 rounded text-black">
+      <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-2 rounded text-black">
+      <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-2 rounded text-black">
+      
       <!-- Captcha -->
-      <div class="flex items-center justify-between bg-gray-800 text-white px-3 py-2 rounded mb-2">
+      <div class="flex items-center justify-between mb-2">
         <span id="captchaText" class="font-bold"></span>
-        <button onclick="generateCaptcha()" class="text-cyan-400">↻</button>
+        <button onclick="generateCaptcha()" class="text-blue-400">↻</button>
       </div>
-      <input id="captchaInput" type="text" placeholder="Masukkan kode di atas" class="mb-4 w-full p-2 rounded text-black" />
-
-      <button onclick="login()" class="bg-cyan-500 w-full py-2 rounded text-white">Login</button>
+      <input id="captchaInput" type="text" placeholder="Masukan kode captcha" class="w-full p-2 mb-2 rounded text-black">
+      
+      <button onclick="login()" class="w-full bg-blue-500 hover:bg-blue-600 p-2 rounded">Login</button>
     </div>
   </div>
 
-  <!-- MAIN APP -->
+  <!-- 🔹 MAIN APP -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
-    <!-- Home / Mining -->
-    <div id="homePage" class="flex-1 flex items-center justify-center">⛏️ Mining Page</div>
 
-    <!-- Wallet -->
-    <div id="walletPage" class="hidden flex-1 flex items-center justify-center">💰 Wallet Page</div>
+    <!-- Halaman Home -->
+    <div id="homePage" class="flex-1 flex items-center justify-center">
+      <h2 class="text-lg">🏠 Home Page</h2>
+    </div>
 
-    <!-- Profile -->
+    <!-- Halaman Mining -->
+    <div id="miningPage" class="hidden flex-1 flex items-center justify-center">
+      <h2 class="text-lg">⛏️ Mining Page</h2>
+    </div>
+
+    <!-- Halaman Wallet -->
+    <div id="walletPage" class="hidden flex-1 flex items-center justify-center">
+      <h2 class="text-lg">💰 Wallet Page</h2>
+    </div>
+
+    <!-- Halaman Profile -->
     <div id="profilePage" class="hidden flex-1 flex items-center justify-center">
-      <div class="glass rounded-xl p-4 profile-box">
-        <h2 class="text-cyan-400 font-semibold text-center mb-3">Profile</h2>
-        <div class="profile-row"><span>Email</span><span class="profile-value" id="profileEmail"></span></div>
-        <div class="profile-row"><span>Username</span><span class="profile-value" id="profileUsername"></span></div>
-        <button onclick="logout()" class="bg-red-500 w-full py-2 rounded mt-3">Logout</button>
+      <div class="glass rounded-xl p-4">
+        <h2 class="text-cyan-400 text-center">Profile</h2>
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>Username:</strong> <span id="profileUsername"></span></p>
+        <button onclick="logout()" class="mt-3 w-full bg-red-500 hover:bg-red-600 p-2 rounded">Logout</button>
       </div>
     </div>
 
-    <!-- Tab bar bawah -->
-    <div class="glass flex justify-around py-3">
-      <button onclick="showPage('homePage')" class="text-cyan-400">⛏️</button>
-      <button onclick="showPage('walletPage')" class="text-cyan-400">💰</button>
-      <button onclick="showPage('profilePage')" class="text-cyan-400">👤</button>
+    <!-- 🔹 Tab Bar -->
+    <div class="flex justify-around bg-black/40 p-2">
+      <button onclick="showPage('homePage')">🏠</button>
+      <button onclick="showPage('miningPage')">⛏️</button>
+      <button onclick="showPage('walletPage')">💰</button>
+      <button onclick="showPage('profilePage')">👤</button>
     </div>
   </div>
 
   <script>
-    let currentCaptcha = "";
-    function generateCaptcha(){
-      currentCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
-      document.getElementById("captchaText").innerText = currentCaptcha;
+    // Simpel Captcha Generator
+    function generateCaptcha() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let i = 0; i < 5; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById("captchaText").textContent = code;
+      return code;
     }
-    generateCaptcha();
 
-    function login(){
-      const email=document.getElementById("email").value;
-      const username=document.getElementById("username").value;
-      const pass=document.getElementById("password").value;
-      const captchaInput=document.getElementById("captchaInput").value;
+    let currentCaptcha = generateCaptcha();
 
-      if(!email || !username || !pass){ alert("Lengkapi semua field!"); return; }
-      if(captchaInput !== currentCaptcha){ alert("Captcha salah!"); return; }
+    // Login function
+    function login() {
+      const email = document.getElementById("email").value;
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const captchaInput = document.getElementById("captchaInput").value;
 
-      // Simpan data
-      localStorage.setItem("email",email);
-      localStorage.setItem("username",username);
+      if (!email || !username || !password) {
+        alert("Semua field wajib diisi!");
+        return;
+      }
+      if (captchaInput !== document.getElementById("captchaText").textContent) {
+        alert("Captcha salah!");
+        return;
+      }
 
-      // Ganti screen
+      localStorage.setItem("email", email);
+      localStorage.setItem("username", username);
+
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("mainApp").classList.remove("hidden");
-
-      // Isi profil
-      document.getElementById("profileEmail").innerText=email;
-      document.getElementById("profileUsername").innerText=username;
-
-      showPage('homePage');
+      showPage("homePage"); // masuk ke Home dulu
+      loadProfile();
     }
 
-    function logout(){
+    // Logout
+    function logout() {
+      localStorage.clear();
       document.getElementById("mainApp").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
       generateCaptcha();
     }
 
-    function showPage(pageId){
-      ["homePage","walletPage","profilePage"].forEach(id=>{
+    // Show page
+    function showPage(pageId) {
+      ["homePage","miningPage","walletPage","profilePage"].forEach(id => {
         document.getElementById(id).classList.add("hidden");
       });
       document.getElementById(pageId).classList.remove("hidden");
+    }
+
+    // Load Profile
+    function loadProfile() {
+      document.getElementById("profileEmail").textContent = localStorage.getItem("email");
+      document.getElementById("profileUsername").textContent = localStorage.getItem("username");
     }
   </script>
 </body>
