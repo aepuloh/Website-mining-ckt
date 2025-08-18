@@ -136,15 +136,7 @@
           let interval;
           if (mining && progress < 100) {
             interval = setInterval(() => {
-              setProgress((prev) => {
-                if (prev >= 100) {
-                  clearInterval(interval);
-                  setMining(false);
-                  setUnclaimed(0.01); // reward otomatis
-                  return 100;
-                }
-                return prev + 2;
-              });
+              setProgress((prev) => (prev < 100 ? prev + 2 : 100));
             }, 200);
           }
           return () => clearInterval(interval);
@@ -154,6 +146,11 @@
           setMining(true);
           setProgress(0);
           setUnclaimed(0);
+        };
+
+        const stopMining = () => {
+          setMining(false);
+          setUnclaimed(0.01); // contoh reward
         };
 
         const claimReward = () => {
@@ -195,6 +192,15 @@
                   className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-green-600 hover:bg-green-700 text-white"
                 >
                   ⚡ Start Mining
+                </button>
+              )}
+
+              {mining && (
+                <button
+                  onClick={stopMining}
+                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-red-600 hover:bg-red-700 text-white"
+                >
+                  ⛔ Stop Mining
                 </button>
               )}
 
