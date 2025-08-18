@@ -7,7 +7,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet" />
   <style>
-   /* === PROFIL COMPACT === */
+    /* Profil lebih rapih & sempit */
+.profile-box {
+  max-width: 20rem;     /* Lebar maksimal kotak */
+  margin: auto;
+  font-size: 0.85rem;   /* kecilkan font */
+}
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.profile-value {
+  min-width: 0;
+  max-width: 11rem;       /* biar ga kepanjangan */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
     body {
       background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
       color: #fff;
