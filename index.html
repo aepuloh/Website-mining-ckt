@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mining App</title>
-  <!-- Tailwind -->
+  <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React -->
+  <!-- React + ReactDOM -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <!-- Babel -->
+  <!-- Babel for JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     body {
@@ -29,7 +29,6 @@
       const [user, setUser] = useState(null);
       const [balance, setBalance] = useState(0);
       const [mining, setMining] = useState(false);
-      const [tab, setTab] = useState("home");
 
       useEffect(() => {
         const onHashChange = () => setRoute(window.location.hash || "#/home");
@@ -59,117 +58,8 @@
         window.location.hash = "#/dashboard";
       }
 
-      // ==== Bottom Menu Component ====
-      function BottomNav() {
-        const menus = [
-          { key: "home", label: "Home", icon: "🏠" },
-          { key: "mining", label: "Mining", icon: "⚡" },
-          { key: "team", label: "Team", icon: "👥" },
-          { key: "wallet", label: "Wallet", icon: "👛" },
-          { key: "profile", label: "Profile", icon: "👤" },
-        ];
-        return (
-          <div className="fixed bottom-0 left-0 right-0 bg-white text-gray-800 flex justify-around py-2 shadow-inner">
-            {menus.map(m => (
-              <button
-                key={m.key}
-                onClick={() => setTab(m.key)}
-                className={`flex flex-col items-center text-xs font-semibold ${tab === m.key ? "text-indigo-600" : "text-gray-500"}`}
-              >
-                <span className="text-lg">{m.icon}</span>
-                {m.label}
-              </button>
-            ))}
-          </div>
-        );
-      }
-
-      // ==== Pages ====
-      if (route.startsWith("#/reg")) {
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-              <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
-              <button onClick={register} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Register Sekarang</button>
-            </div>
-          </div>
-        );
-      }
-
-      if (route === "#/login") {
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-              <h1 className="text-2xl font-bold mb-4">Login</h1>
-              <button onClick={login} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Login</button>
-            </div>
-          </div>
-        );
-      }
-
-      if (route === "#/dashboard" && user) {
-        return (
-          <div className="pb-20">
-            {tab === "home" && (
-              <div className="p-6 text-center">
-                <h1 className="text-2xl font-bold">Welcome {user.name} 👋</h1>
-                <p className="text-sm">Referral: {user.ref}</p>
-              </div>
-            )}
-
-            {tab === "mining" && (
-              <div className="p-6">
-                <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-                  <h1 className="text-2xl font-bold mb-2">Mining Dashboard</h1>
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner">
-                    <p className="text-lg">Balance:</p>
-                    <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
-                  </div>
-                  <button
-                    onClick={() => setMining(!mining)}
-                    className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${mining ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white`}
-                  >
-                    {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {tab === "team" && (
-              <div className="p-6 text-center">
-                <h2 className="text-xl font-bold mb-2">👥 Team Anda</h2>
-                <p className="text-sm">Belum ada anggota tim.</p>
-              </div>
-            )}
-
-            {tab === "wallet" && (
-              <div className="p-6 text-center">
-                <h2 className="text-xl font-bold mb-2">👛 Dompet</h2>
-                <p className="text-sm">Balance saat ini: {balance.toFixed(3)} NKT</p>
-              </div>
-            )}
-
-            {tab === "profile" && (
-              <div className="p-6 text-center">
-                <h2 className="text-xl font-bold mb-2">👤 Profil</h2>
-                <p className="text-sm">Nama: {user.name}</p>
-                <p className="text-sm">Referral: {user.ref}</p>
-                <div className="mt-3">
-                  <h3 className="font-semibold">Referral Link:</h3>
-                  <p className="text-xs break-all bg-gray-100 text-gray-800 p-2 rounded">
-                    {window.location.origin + "#/reg?ref=" + user.name}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <BottomNav />
-          </div>
-        );
-      }
-
-      // Landing page
-      return (
+      // === Pages ===
+      const Landing = () => (
         <div className="flex items-center justify-center h-screen">
           <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl text-center w-96">
             <h1 className="text-3xl font-bold mb-4 text-indigo-700">💎 Mining App</h1>
@@ -178,6 +68,109 @@
             <a href="#/login" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl w-full font-semibold block">Login</a>
           </div>
         </div>
+      );
+
+      const Register = () => (
+        <div className="flex items-center justify-center h-screen">
+          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
+            <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
+            <button onClick={register} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Register Sekarang</button>
+          </div>
+        </div>
+      );
+
+      const Login = () => (
+        <div className="flex items-center justify-center h-screen">
+          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
+            <h1 className="text-2xl font-bold mb-4">Login</h1>
+            <button onClick={login} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Login</button>
+          </div>
+        </div>
+      );
+
+      const Dashboard = () => (
+        <div className="p-6 pb-24">
+          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-2">Dashboard Mining</h1>
+            <p className="text-sm mb-4">Selamat datang, {user.name} (Ref: {user.ref})</p>
+            
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner">
+              <p className="text-lg">Balance:</p>
+              <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
+            </div>
+
+            <button
+              onClick={() => setMining(!mining)}
+              className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${mining ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white`}
+            >
+              {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
+            </button>
+
+            <div className="mt-6">
+              <h3 className="font-semibold">Referral Link:</h3>
+              <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
+                {window.location.origin + "#/reg?ref=" + user.name}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+
+      const Team = () => (
+        <div className="p-6 pb-24">
+          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4">👥 Tim Saya</h1>
+            <p className="text-gray-600">Belum ada anggota tim.</p>
+          </div>
+        </div>
+      );
+
+      const Wallet = () => (
+        <div className="p-6 pb-24">
+          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4">💰 Dompet</h1>
+            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full mb-3">Deposit</button>
+            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full">Withdraw</button>
+          </div>
+        </div>
+      );
+
+      const Profile = () => (
+        <div className="p-6 pb-24">
+          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold mb-4">👤 Profil</h1>
+            <p className="mb-2">Nama: {user?.name}</p>
+            <p>Referral: {user?.ref}</p>
+          </div>
+        </div>
+      );
+
+      // === Bottom Nav ===
+      const BottomNav = () => (
+        <div className="fixed bottom-0 left-0 right-0 bg-white text-gray-700 flex justify-around py-3 shadow-inner">
+          <a href="#/home" className={`flex flex-col items-center ${route==="#/home"?"text-indigo-600":"text-gray-600"}`}>🏠<span className="text-xs">Home</span></a>
+          <a href="#/dashboard" className={`flex flex-col items-center ${route==="#/dashboard"?"text-indigo-600":"text-gray-600"}`}>⚡<span className="text-xs">Mining</span></a>
+          <a href="#/team" className={`flex flex-col items-center ${route==="#/team"?"text-indigo-600":"text-gray-600"}`}>👥<span className="text-xs">Team</span></a>
+          <a href="#/wallet" className={`flex flex-col items-center ${route==="#/wallet"?"text-indigo-600":"text-gray-600"}`}>💰<span className="text-xs">Wallet</span></a>
+          <a href="#/profile" className={`flex flex-col items-center ${route==="#/profile"?"text-indigo-600":"text-gray-600"}`}>👤<span className="text-xs">Profile</span></a>
+        </div>
+      );
+
+      // === Router ===
+      let Page;
+      if (route.startsWith("#/reg")) Page = Register;
+      else if (route === "#/login") Page = Login;
+      else if (route === "#/dashboard" && user) Page = Dashboard;
+      else if (route === "#/team" && user) Page = Team;
+      else if (route === "#/wallet" && user) Page = Wallet;
+      else if (route === "#/profile" && user) Page = Profile;
+      else Page = Landing;
+
+      return (
+        <>
+          <Page />
+          {user && route !== "#/login" && route !== "#/reg" && <BottomNav />}
+        </>
       );
     }
 
