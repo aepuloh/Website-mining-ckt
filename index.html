@@ -143,26 +143,27 @@
 
       <!-- Profile -->
       <div id="profilePage" class="hidden fade-in">
-        <div class="glass rounded-2xl p-6 text-center">
-          <h2 class="text-xl font-bold glow mb-4 flex items-center justify-center gap-2">
-            <i class="lucide-user-round"></i> Profile
-          </h2>
-          <div class="grid gap-2 max-w-md mx-auto text-left">
-            <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
-              <span class="text-gray-300 flex items-center gap-2"><i class="lucide-mail"></i>Email</span>
-              <span id="profileEmail" class="font-mono"></span>
-            </div>
-            <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
-              <span class="text-gray-300 flex items-center gap-2"><i class="lucide-user"></i>Username</span>
-              <span id="profileName" class="font-mono"></span>
-            </div>
-          </div>
-          <button onclick="logout()" class="mt-5 bg-red-500 hover:bg-red-400 px-4 py-2 rounded-xl flex items-center gap-2 mx-auto">
-            <i class="lucide-log-out"></i> Logout
-          </button>
-        </div>
+      <!-- Profile -->
+<div id="profilePage" class="hidden fade-in">
+  <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto">
+    <h2 class="text-xl font-bold glow mb-4 flex items-center justify-center gap-2">
+      <i class="lucide-user-round"></i> Profile
+    </h2>
+    <div class="grid gap-2 text-left">
+      <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
+        <span class="text-gray-300 flex items-center gap-2"><i class="lucide-mail"></i>Email</span>
+        <span id="profileEmail" class="font-mono"></span>
+      </div>
+      <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
+        <span class="text-gray-300 flex items-center gap-2"><i class="lucide-user"></i>Username</span>
+        <span id="profileName" class="font-mono"></span>
       </div>
     </div>
+    <button onclick="logout()" class="mt-5 bg-red-500 hover:bg-red-400 px-4 py-2 rounded-xl flex items-center gap-2 mx-auto">
+      <i class="lucide-log-out"></i> Logout
+    </button>
+  </div>
+</div>
 
     <!-- Tab Bar -->
     <div id="tabBar" class="glass flex justify-around items-center p-3 fixed bottom-0 w-full hidden">
