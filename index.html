@@ -1,159 +1,468 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fire-Mining</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fire-Mining — Animated</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: white;
-      font-family: sans-serif;
+    :root{
+      --bg1:#0f1724; --bg2:#0b1220; --accent:#00f2ff; --accent2:#7C3AED;
+      --card:#0f1724aa;
     }
-    .hidden { display: none; }
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent 8%),
+                  radial-gradient(1000px 500px at 90% 90%, rgba(0,242,255,0.06), transparent 8%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex; flex-direction:column; height:100vh; overflow:hidden;
+    }
+
+    /* Generic glass card */
     .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
     }
-    /* 🔹 Styling profil kecil */
-    #profilePage {
-      font-size: 0.85rem;
+
+    /* Page container */
+    .app-body { flex:1; display:flex; flex-direction:column; }
+
+    /* header */
+    .app-header { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo .dot { width:10px; height:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:50%; box-shadow:0 0 12px var(--accent); }
+    .logo h1{ font-weight:700; font-size:18px; margin:0; color: #eafcff; text-shadow:0 6px 18px rgba(0,242,255,0.06); }
+
+    /* pages area */
+    .pages { flex:1; position:relative; padding:18px; display:flex; align-items:stretch; justify-content:center; }
+
+    .page {
+      position:absolute; inset:18px; border-radius:14px; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s ease;
+      opacity:0; transform: translateY(8px) scale(.995);
+      pointer-events:none;
     }
-    #profilePage .glass {
-      max-width: 20rem;
-      margin: auto;
-      padding: 1rem;
+    .page.active { opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
+
+    /* animated transition when switching */
+    .page.enter-right { transform: translateX(20px); }
+    .page.enter-left { transform: translateX(-20px); }
+
+    /* Mining machine card */
+    .miner-card {
+      width:100%; max-width:760px; padding:28px; border-radius:14px;
+      display:flex; gap:22px; align-items:center; justify-content:space-between;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
     }
-    #profilePage h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+
+    .miner-visual { width: 320px; height:200px; position:relative; border-radius:12px; overflow:hidden; }
+    /* animated stripes for "machine" */
+    .machine-core {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     }
-    #profilePage p {
-      font-size: 0.75rem;
-      word-wrap: break-word;
+    .strip {
+      position:absolute; inset:0; background:repeating-linear-gradient(120deg, rgba(255,255,255,0.01) 0 6px, rgba(0,0,0,0.02) 6px 12px);
+      mix-blend-mode:overlay; animation:strip-move 3s linear infinite;
+      opacity:.9;
+    }
+    @keyframes strip-move { from{ background-position:0 0 } to { background-position:200px 0 } }
+
+    /* rotating core */
+    .core-ring {
+      width:110px; height:110px; border-radius:50%; display:grid; place-items:center;
+      background: conic-gradient(from 120deg, rgba(0,242,255,0.14), rgba(124,58,237,0.12), rgba(0,242,255,0.06));
+      box-shadow: 0 6px 30px rgba(0,242,255,0.06), inset 0 2px 8px rgba(255,255,255,0.02);
+      animation:spin 6s linear infinite;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    @keyframes spin { from{ transform:rotate(0deg) } to{ transform:rotate(360deg) } }
+
+    .core-glow { width:70px; height:70px; border-radius:50%; background:linear-gradient(90deg,var(--accent),var(--accent2)); filter:blur(10px); opacity:.12; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; }
+
+    /* sparks */
+    .spark {
+      position:absolute; width:6px; height:6px; border-radius:50%;
+      background: linear-gradient(90deg, #ffd87a, #ff6b6b);
+      box-shadow: 0 0 12px rgba(255,110,60,0.7);
+      opacity:0; transform:translate(-50%,-50%) scale(.6);
+      animation: spark-fly 1200ms linear infinite;
+    }
+    @keyframes spark-fly {
+      0% { opacity:0; transform:translate(-50%,-50%) scale(.3) translateY(0px) }
+      20% { opacity:1 }
+      100% { opacity:0; transform:translate(-50%,-50%) scale(1.1) translateY(-90px) }
+    }
+
+    /* progress bar */
+    .progress-wrap { width:320px; max-width:48%; display:flex; flex-direction:column; gap:12px; }
+    .progress-bar { height:14px; background:rgba(255,255,255,0.04); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);}
+    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s linear; box-shadow:0 6px 30px rgba(124,58,237,0.08) inset;}
+    .stat { font-family:monospace; opacity:.9; }
+
+    /* buttons */
+    .btn { padding:.6rem .9rem; border-radius:10px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.04); }
+    .btn-start { background:linear-gradient(90deg,#12c2e9,#c471ed); color:#041124; box-shadow:0 6px 18px rgba(0,0,0,0.5); }
+    .btn-stop { background:linear-gradient(90deg,#ff6b6b,#ffd87a); color:#041124; }
+
+    /* Wallet & Home small card */
+    .mini-card { width:300px; max-width:80%; padding:14px; border-radius:12px; text-align:center; }
+
+    /* Tabbar */
+    .tabbar { display:flex; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(0,0,0,0.35); border-top:1px solid rgba(255,255,255,0.03); }
+    .tab { padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .25s ease; color:rgba(255,255,255,0.85); }
+    .tab.active { background:linear-gradient(90deg, rgba(0,242,255,0.08), rgba(124,58,237,0.06)); transform:translateY(-4px); box-shadow:0 8px 28px rgba(0,0,0,0.45); }
+
+    /* responsive */
+    @media (max-width:640px){
+      .miner-card{ flex-direction:column; gap:16px; align-items:center; }
+      .progress-wrap{ max-width:100%; width:100%; }
     }
   </style>
 </head>
-<body class="h-screen flex flex-col">
+<body>
+  <div class="app-body">
 
-  <!-- 🔹 LOGIN SCREEN -->
-  <div id="loginScreen" class="h-screen flex items-center justify-center">
-    <div class="glass p-6 rounded-xl w-80">
-      <h2 class="text-xl font-bold text-center mb-4">Login</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-2 rounded text-black">
-      <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-2 rounded text-black">
-      <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-2 rounded text-black">
-      
-      <!-- Captcha -->
-      <div class="flex items-center justify-between mb-2">
-        <span id="captchaText" class="font-bold"></span>
-        <button onclick="generateCaptcha()" class="text-blue-400">↻</button>
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <div class="dot"></div>
+        <h1>Fire-Mining</h1>
       </div>
-      <input id="captchaInput" type="text" placeholder="Masukan kode captcha" class="w-full p-2 mb-2 rounded text-black">
-      
-      <button onclick="login()" class="w-full bg-blue-500 hover:bg-blue-600 p-2 rounded">Login</button>
-    </div>
-  </div>
-
-  <!-- 🔹 MAIN APP -->
-  <div id="mainApp" class="hidden flex-1 flex flex-col">
-
-    <!-- Halaman Home -->
-    <div id="homePage" class="flex-1 flex items-center justify-center">
-      <h2 class="text-lg">🏠 Home Page</h2>
-    </div>
-
-    <!-- Halaman Mining -->
-    <div id="miningPage" class="hidden flex-1 flex items-center justify-center">
-      <h2 class="text-lg">⛏️ Mining Page</h2>
-    </div>
-
-    <!-- Halaman Wallet -->
-    <div id="walletPage" class="hidden flex-1 flex items-center justify-center">
-      <h2 class="text-lg">💰 Wallet Page</h2>
-    </div>
-
-    <!-- Halaman Profile -->
-    <div id="profilePage" class="hidden flex-1 flex items-center justify-center">
-      <div class="glass rounded-xl p-4">
-        <h2 class="text-cyan-400 text-center">Profile</h2>
-        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-        <p><strong>Username:</strong> <span id="profileUsername"></span></p>
-        <button onclick="logout()" class="mt-3 w-full bg-red-500 hover:bg-red-600 p-2 rounded">Logout</button>
+      <div class="flex items-center gap-3">
+        <div class="text-sm opacity-80" id="headerUser">Guest</div>
       </div>
-    </div>
+    </header>
 
-    <!-- 🔹 Tab Bar -->
-    <div class="flex justify-around bg-black/40 p-2">
-      <button onclick="showPage('homePage')">🏠</button>
-      <button onclick="showPage('miningPage')">⛏️</button>
-      <button onclick="showPage('walletPage')">💰</button>
-      <button onclick="showPage('profilePage')">👤</button>
-    </div>
+    <!-- Pages -->
+    <main class="pages">
+      <!-- HOME -->
+      <section id="homePage" class="page active">
+        <div class="glass miner-card">
+          <div style="flex:1">
+            <h3 class="text-lg font-semibold mb-2">Welcome back</h3>
+            <p class="text-sm opacity-80 mb-4">Ringkasan mining & akses cepat</p>
+
+            <div class="mini-card glass">
+              <div class="text-sm opacity-80">Saldo</div>
+              <div id="homeBalance" class="text-2xl font-mono mt-1">0.0000 KOT</div>
+            </div>
+
+            <div class="mt-4 flex gap-3">
+              <button class="btn btn-start" onclick="startMining()"><span>⛏️ Start Mining</span></button>
+              <button class="btn" onclick="showPage('walletPage')">💰 Wallet</button>
+            </div>
+          </div>
+
+          <div style="width:42%; display:flex; align-items:center; justify-content:center">
+            <div class="machine-core miner-visual glass" aria-hidden>
+              <div class="strip"></div>
+              <div class="core-glow"></div>
+              <div class="core-ring">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M2 12h4M18 12h4M4.2 19.8l2.8-2.8M17 7l2.8-2.8" stroke="white" stroke-opacity=".7" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </div>
+              <!-- sparks (will be positioned by JS) -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MINING -->
+      <section id="miningPage" class="page">
+        <div class="glass miner-card">
+          <div class="miner-visual" style="min-width:320px">
+            <div class="strip"></div>
+            <div class="machine-core" style="z-index:2">
+              <div class="core-ring" id="coreRing"></div>
+              <div style="position:relative; z-index:5; text-align:center; margin-top:8px">
+                <div class="stat" id="hashrate">0 H/s</div>
+                <div class="stat opacity-80 text-sm">Realtime Hashrate</div>
+              </div>
+            </div>
+            <div class="core-glow"></div>
+            <!-- sparks generated by JS -->
+          </div>
+
+          <div class="progress-wrap">
+            <div class="text-sm opacity-80">Mining Progress</div>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill" style="width:0%"></div>
+            </div>
+
+            <div class="text-sm opacity-80">Unclaimed: <span id="unclaimed">0.0000</span> KOT</div>
+
+            <div class="mt-2 flex gap-2">
+              <button id="startBtn" class="btn btn-start" onclick="startMining()">Start</button>
+              <button id="stopBtn" class="btn btn-stop" onclick="stopMining()" style="display:none">Stop</button>
+              <button class="btn" onclick="claim()">Claim</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WALLET -->
+      <section id="walletPage" class="page">
+        <div class="glass miner-card" style="flex-direction:column; align-items:center; padding:28px 40px;">
+          <h3 class="text-lg mb-2">Wallet</h3>
+          <div class="mini-card glass">
+            <div class="text-sm opacity-80">Total Balance</div>
+            <div id="walletBalance" class="text-2xl font-mono mt-1">0.0000 KOT</div>
+          </div>
+          <div class="mt-4 w-full max-w-md text-sm opacity-80">Riwayat transaksi sederhana akan muncul di sini (demo).</div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="profilePage" class="page">
+        <div class="glass miner-card" style="flex-direction:column; align-items:center; padding:20px; max-width:460px;">
+          <h3 class="text-cyan-300">Profile</h3>
+          <div style="width:100%; margin-top:10px">
+            <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+              <div class="opacity-80 text-sm">Email</div>
+              <div id="profileEmail" class="font-mono profile-value" style="max-width:190px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;"></div>
+            </div>
+            <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
+              <div class="opacity-80 text-sm">Username</div>
+              <div id="profileName" class="font-mono" style="max-width:190px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;"></div>
+            </div>
+            <button onclick="logout()" class="btn btn-stop" style="width:100%; margin-top:14px">Logout</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tabbar -->
+    <nav class="tabbar">
+      <div class="tab active" data-page="homePage" onclick="onTabClick(event)">🏠 Home</div>
+      <div class="tab" data-page="miningPage" onclick="onTabClick(event)">⛏️ Mining</div>
+      <div class="tab" data-page="walletPage" onclick="onTabClick(event)">💰 Wallet</div>
+      <div class="tab" data-page="profilePage" onclick="onTabClick(event)">👤 Profile</div>
+    </nav>
   </div>
 
   <script>
-    // Simpel Captcha Generator
-    function generateCaptcha() {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let code = "";
-      for (let i = 0; i < 5; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    /* --- App state --- */
+    let miningInterval = null;
+    let unclaimed = 0;
+    let balance = 0;
+    let lastTime = null;
+    let hash = 0;
+
+    // Utility: show page with animated direction
+    function showPage(targetId) {
+      const pages = document.querySelectorAll('.page');
+      const active = document.querySelector('.page.active');
+      if (active && active.id === targetId) return;
+
+      // find direction for animation (index)
+      const tabs = ['homePage','miningPage','walletPage','profilePage'];
+      const fromIdx = active ? tabs.indexOf(active.id) : 0;
+      const toIdx = tabs.indexOf(targetId);
+      const direction = toIdx > fromIdx ? 'left' : 'right'; // entering from left if toIdx > fromIdx
+
+      if (active) {
+        active.classList.remove('active');
+        active.classList.add(direction === 'left' ? 'enter-left' : 'enter-right');
+        // remove temporary class after animation
+        setTimeout(()=> active.classList.remove('enter-left','enter-right'), 450);
       }
-      document.getElementById("captchaText").textContent = code;
+
+      const next = document.getElementById(targetId);
+      next.classList.add('active');
+
+      // update tab highlights
+      document.querySelectorAll('.tab').forEach(t=>{
+        t.classList.toggle('active', t.dataset.page === targetId);
+      });
+    }
+
+    function onTabClick(e){
+      const page = e.currentTarget.dataset.page;
+      showPage(page);
+    }
+
+    // --- Captcha & Login (demo simplified) ---
+    function generateCaptcha(){
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = '';
+      for(let i=0;i<5;i++) code += chars.charAt(Math.floor(Math.random()*chars.length));
+      // place in a hidden input? here we'll reuse headerUser as placeholder for demo login screen omitted.
+      // For simplicity in this version we auto-validate without explicit captcha UI during login.
       return code;
     }
 
-    let currentCaptcha = generateCaptcha();
-
-    // Login function
-    function login() {
-      const email = document.getElementById("email").value;
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      const captchaInput = document.getElementById("captchaInput").value;
-
-      if (!email || !username || !password) {
-        alert("Semua field wajib diisi!");
-        return;
-      }
-      if (captchaInput !== document.getElementById("captchaText").textContent) {
-        alert("Captcha salah!");
-        return;
-      }
-
-      localStorage.setItem("email", email);
-      localStorage.setItem("username", username);
-
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("mainApp").classList.remove("hidden");
-      showPage("homePage"); // masuk ke Home dulu
-      loadProfile();
+    // Demo quick-login
+    function demoLogin(){
+      const user = prompt('Masukkan username demo','Aepuloh') || 'Guest';
+      const email = (user+'@example.com').toLowerCase();
+      localStorage.setItem('username', user);
+      localStorage.setItem('email', email);
+      localStorage.setItem('balance', '0');
+      onAppStart();
     }
 
-    // Logout
-    function logout() {
+    // Start mining: animate progress, create sparks, increment unclaimed
+    function startMining(){
+      if(miningInterval) return;
+      document.getElementById('startBtn') && (document.getElementById('startBtn').style.display='none');
+      document.getElementById('stopBtn') && (document.getElementById('stopBtn').style.display='inline-block');
+
+      // animate core speed
+      document.getElementById('coreRing')?.classList.add('spinning');
+
+      lastTime = performance.now();
+      miningInterval = setInterval(()=>{
+        // increase hashrate randomly
+        hash = Math.floor(100 + Math.random()*900);
+        document.getElementById('hashrate').innerText = hash + ' H/s';
+
+        // progress increments
+        const fill = document.getElementById('progressFill');
+        const current = parseFloat(fill.dataset.val || '0');
+        let next = Math.min(100, current + (0.6 + Math.random()*1.2)); // faster slightly random
+        fill.style.width = next + '%';
+        fill.dataset.val = next;
+
+        // add unclaimed based on fill
+        unclaimed += 0.00001 + Math.random()*0.00004;
+        document.getElementById('unclaimed').innerText = unclaimed.toFixed(6);
+
+        // spawn a spark near core:
+        spawnSpark();
+        // update home/wallet UI
+        updateUI();
+      }, 700);
+    }
+
+    function stopMining(){
+      if(!miningInterval) return;
+      clearInterval(miningInterval);
+      miningInterval = null;
+      document.getElementById('startBtn') && (document.getElementById('startBtn').style.display='inline-block');
+      document.getElementById('stopBtn') && (document.getElementById('stopBtn').style.display='none');
+      document.getElementById('hashrate').innerText = '0 H/s';
+    }
+
+    function claim(){
+      balance += unclaimed;
+      unclaimed = 0;
+      // reset progress
+      const fill = document.getElementById('progressFill');
+      fill.style.width = '0%';
+      fill.dataset.val = '0';
+      updateUI();
+      // small feedback
+      toast('Claimed to wallet ✓');
+    }
+
+    function spawnSpark(){
+      const container = document.querySelectorAll('.miner-visual')[0] || document.querySelectorAll('.machine-core')[0];
+      if(!container) return;
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      // random position near bottom-center of visual
+      const w = container.clientWidth, h = container.clientHeight;
+      const x = w/2 + (Math.random()*120 - 60);
+      const y = h/2 + (Math.random()*40 - 10);
+      spark.style.left = x + 'px';
+      spark.style.top = y + 'px';
+      // random duration
+      const dur = 900 + Math.random()*700;
+      spark.style.animationDuration = dur + 'ms';
+      container.appendChild(spark);
+      setTimeout(()=> {
+        spark.remove();
+      }, dur+50);
+    }
+
+    function updateUI(){
+      document.getElementById('homeBalance').innerText = balance.toFixed(6) + ' KOT';
+      document.getElementById('walletBalance').innerText = balance.toFixed(6);
+      document.getElementById('unclaimed').innerText = unclaimed.toFixed(6);
+    }
+
+    function toast(msg){
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.position = 'fixed';
+      el.style.left = '50%';
+      el.style.bottom = '86px';
+      el.style.transform = 'translateX(-50%)';
+      el.style.padding = '10px 16px';
+      el.style.borderRadius = '10px';
+      el.style.background = 'rgba(0,0,0,0.7)';
+      el.style.color = 'white';
+      el.style.zIndex = 9999;
+      el.style.fontSize = '14px';
+      document.body.appendChild(el);
+      setTimeout(()=> el.style.opacity = '0', 2200);
+      setTimeout(()=> el.remove(), 2600);
+    }
+
+    function logout(){
       localStorage.clear();
-      document.getElementById("mainApp").classList.add("hidden");
-      document.getElementById("loginScreen").classList.remove("hidden");
-      generateCaptcha();
+      location.reload();
     }
 
-    // Show page
-    function showPage(pageId) {
-      ["homePage","miningPage","walletPage","profilePage"].forEach(id => {
-        document.getElementById(id).classList.add("hidden");
-      });
-      document.getElementById(pageId).classList.remove("hidden");
+    // initialize app if stored user exists
+    function onAppStart(){
+      const u = localStorage.getItem('username');
+      const e = localStorage.getItem('email');
+      const b = parseFloat(localStorage.getItem('balance') || '0');
+      balance = isNaN(b) ? 0 : b;
+      if(u && e){
+        document.getElementById('headerUser').innerText = u;
+        updateUI();
+        // show app (swap views)
+        document.querySelectorAll('.page').forEach(p=> p.classList.remove('active'));
+        document.getElementById('homePage').classList.add('active');
+        document.querySelectorAll('.tab').forEach(t=> t.classList.remove('active'));
+        document.querySelector('.tab[data-page="homePage"]').classList.add('active');
+      } else {
+        // no user - prompt quick demo login
+        setTimeout(()=> {
+          const login = confirm('Auto-demo login? Tekan OK untuk masuk (demo).');
+          if(login) demoLogin();
+        }, 400);
+      }
     }
 
-    // Load Profile
-    function loadProfile() {
-      document.getElementById("profileEmail").textContent = localStorage.getItem("email");
-      document.getElementById("profileUsername").textContent = localStorage.getItem("username");
+    function demoLogin(){
+      const user = 'Aepuloh';
+      const email = 'airdropshunterid@gmail.com';
+      localStorage.setItem('username', user);
+      localStorage.setItem('email', email);
+      localStorage.setItem('balance', '0');
+      onAppStart();
+      document.getElementById('profileEmail').innerText = email;
+      document.getElementById('profileName').innerText = user;
     }
+
+    // on load
+    window.addEventListener('load', ()=> {
+      // default show home
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('homePage').classList.add('active');
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelector('.tab[data-page="homePage"]').classList.add('active');
+
+      // fill profile if exists
+      const e = localStorage.getItem('email'), u = localStorage.getItem('username');
+      if(e) document.getElementById('profileEmail').innerText = e;
+      if(u) { document.getElementById('profileName').innerText = u; document.getElementById('headerUser').innerText = u; }
+
+      updateUI();
+      // if no user, show quick demo prompt
+      if(!u) setTimeout(()=> demoLogin(), 600);
+    });
   </script>
 </body>
 </html>
