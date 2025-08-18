@@ -4,28 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mining App</title>
-  <!-- Tailwind via CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React + ReactDOM -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <!-- Babel for JSX -->
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    body {
-      background: linear-gradient(135deg, #1e3a8a, #6d28d9);
-      min-height: 100vh;
-    }
-    .spin {
-      animation: spin 4s linear infinite;
-    }
-    @keyframes spin {
-      from {transform: rotate(0deg);}
-      to {transform: rotate(360deg);}
-    }
-  </style>
 </head>
-<body class="text-white font-sans">
+<body class="bg-gray-100 text-gray-900">
   <div id="root"></div>
 
   <script type="text/babel">
@@ -36,7 +23,6 @@
       const [user, setUser] = useState(null);
       const [balance, setBalance] = useState(0);
       const [mining, setMining] = useState(false);
-      const [progress, setProgress] = useState(0);
 
       useEffect(() => {
         const onHashChange = () => setRoute(window.location.hash || "#/home");
@@ -49,7 +35,6 @@
         if (mining) {
           timer = setInterval(() => {
             setBalance((b) => b + 0.001);
-            setProgress((p) => (p >= 100 ? 0 : p + 10));
           }, 1000);
         }
         return () => clearInterval(timer);
@@ -67,130 +52,68 @@
         window.location.hash = "#/dashboard";
       }
 
-      // === Pages ===
-      const Landing = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl text-center w-96">
-            <h1 className="text-3xl font-bold mb-4 text-indigo-700">💎 Mining App</h1>
-            <p className="mb-6 text-gray-600">Bentuk tim Anda dan hasilkan uang bersama!</p>
-            <a href="#/reg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl w-full font-semibold block mb-3">Register</a>
-            <a href="#/login" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl w-full font-semibold block">Login</a>
-          </div>
-        </div>
-      );
-
-      const Register = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-            <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
-            <button onClick={register} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Register Sekarang</button>
-          </div>
-        </div>
-      );
-
-      const Login = () => (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-            <h1 className="text-2xl font-bold mb-4">Login</h1>
-            <button onClick={login} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full font-semibold">Login</button>
-          </div>
-        </div>
-      );
-
-      const Dashboard = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-xl font-bold">⚡ Dashboard</h1>
-              <span className="text-sm text-gray-500">Ref: {user.ref}</span>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="relative w-32 h-32 mb-4">
-                <div className="absolute inset-0 border-4 border-indigo-500 rounded-full spin"></div>
-                <div className="absolute inset-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <h2 className="text-xl font-bold text-white">{balance.toFixed(3)}</h2>
-                </div>
+      // ========== Dashboard ==========
+      if (route === "#/dashboard" && user) {
+        return (
+          <div className="p-6 pb-24">
+            <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+              
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner">
+                <p className="text-lg">Balance:</p>
+                <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
               </div>
-              <p className="text-gray-600">NKT Balance</p>
-            </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-3 mt-6">
-              <div className="bg-indigo-600 h-3 rounded-full transition-all" style={{ width: progress + "%" }}></div>
-            </div>
+              <button
+                onClick={() => setMining(!mining)}
+                className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${mining ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white`}
+              >
+                {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
+              </button>
 
-            <button
-              onClick={() => setMining(!mining)}
-              className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${mining ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"} text-white`}
-            >
-              {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
-            </button>
-
-            <div className="mt-6">
-              <h3 className="font-semibold">Referral Link:</h3>
-              <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
-                {window.location.origin + "#/reg?ref=" + user.name}
-              </p>
+              <div className="mt-6">
+                <h3 className="font-semibold">Referral Link:</h3>
+                <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
+                  {window.location.origin + "#/reg?ref=" + user.name}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      );
+        );
+      }
 
-      const Team = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-            <h1 className="text-2xl font-bold mb-4">👥 Tim Saya</h1>
-            <p className="text-gray-600">Belum ada anggota tim.</p>
+      // ========== Register ==========
+      if (route.startsWith("#/reg")) {
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="bg-white p-6 rounded-xl shadow-md text-center">
+              <h1 className="text-xl font-bold mb-4">Register</h1>
+              <button onClick={register} className="bg-blue-500 text-white px-4 py-2 rounded">Register Now</button>
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
 
-      const Wallet = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-            <h1 className="text-2xl font-bold mb-4">💰 Dompet</h1>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full mb-3">Deposit</button>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full">Withdraw</button>
+      // ========== Login ==========
+      if (route === "#/login") {
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="bg-white p-6 rounded-xl shadow-md text-center">
+              <h1 className="text-xl font-bold mb-4">Login</h1>
+              <button onClick={login} className="bg-green-500 text-white px-4 py-2 rounded">Login</button>
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
 
-      const Profile = () => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
-            <h1 className="text-2xl font-bold mb-4">👤 Profil</h1>
-            <p className="mb-2">Nama: {user?.name}</p>
-            <p>Referral: {user?.ref}</p>
-          </div>
-        </div>
-      );
-
-      // === Bottom Nav ===
-      const BottomNav = () => (
-        <div className="fixed bottom-0 left-0 right-0 bg-white text-gray-700 flex justify-around py-3 shadow-inner">
-          <a href="#/home" className={`flex flex-col items-center ${route==="#/home"?"text-indigo-600":"text-gray-600"}`}>🏠<span className="text-xs">Home</span></a>
-          <a href="#/dashboard" className={`flex flex-col items-center ${route==="#/dashboard"?"text-indigo-600":"text-gray-600"}`}>⚡<span className="text-xs">Mining</span></a>
-          <a href="#/team" className={`flex flex-col items-center ${route==="#/team"?"text-indigo-600":"text-gray-600"}`}>👥<span className="text-xs">Team</span></a>
-          <a href="#/wallet" className={`flex flex-col items-center ${route==="#/wallet"?"text-indigo-600":"text-gray-600"}`}>💰<span className="text-xs">Wallet</span></a>
-          <a href="#/profile" className={`flex flex-col items-center ${route==="#/profile"?"text-indigo-600":"text-gray-600"}`}>👤<span className="text-xs">Profile</span></a>
-        </div>
-      );
-
-      // === Router ===
-      let Page;
-      if (route.startsWith("#/reg")) Page = Register;
-      else if (route === "#/login") Page = Login;
-      else if (route === "#/dashboard" && user) Page = Dashboard;
-      else if (route === "#/team" && user) Page = Team;
-      else if (route === "#/wallet" && user) Page = Wallet;
-      else if (route === "#/profile" && user) Page = Profile;
-      else Page = Landing;
-
+      // ========== Home ==========
       return (
-        <>
-          <Page />
-          {user && route !== "#/login" && route !== "#/reg" && <BottomNav />}
-        </>
+        <div className="flex items-center justify-center h-screen">
+          <div className="bg-white p-6 rounded-xl shadow-md text-center">
+            <h1 className="text-2xl font-bold mb-4">Welcome to Mining App</h1>
+            <a href="#/reg" className="bg-blue-500 text-white px-4 py-2 rounded m-2 inline-block">Register</a>
+            <a href="#/login" className="bg-green-500 text-white px-4 py-2 rounded m-2 inline-block">Login</a>
+          </div>
+        </div>
       );
     }
 
