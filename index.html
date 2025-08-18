@@ -7,6 +7,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet" />
   <style>
+   /* === PROFIL COMPACT === */
+.profile-compact {
+  max-width: 22rem;        /* lebih sempit */
+  font-size: 0.85rem;      /* kecilkan font */
+}
+.profile-row {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: .5rem;
+  padding: .5rem .75rem;
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.profile-label { opacity: .75; }
+.profile-value {
+  min-width: 0;            /* penting biar truncate jalan */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* email panjang jadi "..." */
+  text-align: right;
+} 
     body {
       background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
       color: #fff;
@@ -43,6 +67,30 @@
 <body class="h-screen flex flex-col">
 
   <!-- Login Screen -->
+  <!-- Profile Screen -->
+<div id="profileScreen" class="h-screen flex items-center justify-center">
+  <div class="glass card-3d rounded-2xl p-6 w-[26rem] max-w-[90vw] shadow-2xl profile-compact">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-cyan-400 font-semibold">Profil</h2>
+      <i class="lucide-user w-5 h-5 text-cyan-400"></i>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Email</span>
+      <span class="profile-value">useremailyangsangatpanjangbanget@example-super-duper-domain.com</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Username</span>
+      <span class="profile-value">CryptoUser_001</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Balance</span>
+      <span class="profile-value">100 KOT</span>
+    </div>
+  </div>
+</div>
   <div id="loginScreen" class="flex flex-col items-center justify-center h-screen">
     <div class="glass card-3d rounded-2xl p-8 w-[26rem] max-w-[90vw] text-center shadow-2xl fade-in">
       <div class="flex items-center justify-center gap-2 mb-6">
