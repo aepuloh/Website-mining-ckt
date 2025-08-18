@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mining App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-100">
     <div id="root"></div>
@@ -15,72 +15,67 @@
     <script type="text/babel">
       const { useState, useEffect } = React;
 
-      function App() {
-        const [page, setPage] = useState("home");
-        const [user, setUser] = useState(null);
-        const [balance, setBalance] = useState(0);
-        const [mining, setMining] = useState(false);
-        const [tab, setTab] = useState("home");
+      // ===== Login Component =====
+      const Login = ({ onLogin }) => {
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [error, setError] = useState("");
 
-        useEffect(() => {
-          function handleHashChange() {
-            const hash = window.location.hash.replace("#/", "");
-            setPage(hash || "home");
+        const handleLogin = () => {
+          if (!email || !password) {
+            setError("Email dan Password wajib diisi!");
+            return;
           }
-          window.addEventListener("hashchange", handleHashChange);
-          handleHashChange();
-          return () => window.removeEventListener("hashchange", handleHashChange);
-        }, []);
-
-        useEffect(() => {
-          let interval;
-          if (mining) {
-            interval = setInterval(() => {
-              setBalance((b) => b + 0.001);
-            }, 1000);
+          if (password.length < 6) {
+            setError("Password minimal 6 karakter!");
+            return;
           }
-          return () => clearInterval(interval);
-        }, [mining]);
+          setError("");
+          onLogin({ name: email, ref: "Self" });
+          window.location.hash = "#/dashboard";
+        };
 
-        if (page === "reg") return <Register setUser={setUser} />;
-        if (page === "login") return <Login setUser={setUser} />;
-        if (page === "dashboard" && user)
-          return (
-            <Dashboard
-              user={user}
-              balance={balance}
-              mining={mining}
-              setMining={setMining}
-              tab={tab}
-              setTab={setTab}
-            />
-          );
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-80">
+              <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mb-2 p-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mb-2 p-2 border rounded"
+              />
+              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+              <button
+                onClick={handleLogin}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              >
+                Login
+              </button>
+              <p className="mt-4 text-sm text-center">
+                Belum punya akun?{" "}
+                <a href="#/reg" className="text-blue-600">Register</a>
+              </p>
+            </div>
+          </div>
+        );
+      };
 
-        return <Home />;
-      }
-
-      const Home = () => (
-        <div className="flex flex-col items-center justify-center h-screen text-center px-4">
-          <h1 className="text-3xl font-bold mb-4">Selamat Datang</h1>
-          <p className="mb-6">Ayo bentuk tim Anda dan hasilkan uang bersama!</p>
-          <a
-            href="#/reg"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg font-semibold"
-          >
-            Daftar Sekarang
-          </a>
-          <a href="#/login" className="mt-4 text-indigo-600 font-medium">
-            Sudah punya akun? Login
-          </a>
-        </div>
-      );
-
-      const Register = ({ setUser }) => {
+      // ===== Register Component =====
+      const Register = ({ onRegister }) => {
         const [username, setUsername] = useState("");
         const [password, setPassword] = useState("");
         const [error, setError] = useState("");
 
-        function handleRegister() {
+        const handleRegister = () => {
           if (!username || !password) {
             setError("Username dan Password wajib diisi!");
             return;
@@ -92,178 +87,155 @@
           setError("");
           const params = new URLSearchParams(window.location.hash.split("?")[1]);
           const ref = params.get("ref") || "NoRef";
-          setUser({ name: username, ref });
+          onRegister({ name: username, ref });
           window.location.hash = "#/dashboard";
-        }
+        };
 
         return (
           <div className="flex items-center justify-center h-screen">
-            <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-              <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-80">
+              <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
               <input
                 type="text"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
+                className="w-full mb-2 p-2 border rounded"
               />
               <input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
+                className="w-full mb-2 p-2 border rounded"
               />
-              {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
               <button
                 onClick={handleRegister}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full font-semibold"
+                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
               >
-                Register Sekarang
+                Register
               </button>
+              <p className="mt-4 text-sm text-center">
+                Sudah punya akun?{" "}
+                <a href="#/login" className="text-blue-600">Login</a>
+              </p>
             </div>
           </div>
         );
       };
 
-      const Login = ({ setUser }) => {
-        const [email, setEmail] = useState("");
-        const [password, setPassword] = useState("");
-        const [error, setError] = useState("");
+      // ===== Dashboard Component =====
+      const Dashboard = ({ user }) => {
+        const [mining, setMining] = useState(false);
+        const [progress, setProgress] = useState(0);
+        const [unclaimed, setUnclaimed] = useState(0);
+        const [balance, setBalance] = useState(0);
 
-        function handleLogin() {
-          if (!email || !password) {
-            setError("Email dan Password wajib diisi!");
-            return;
+        useEffect(() => {
+          let interval;
+          if (mining && progress < 100) {
+            interval = setInterval(() => {
+              setProgress((prev) => {
+                if (prev >= 100) {
+                  clearInterval(interval);
+                  setMining(false);
+                  setUnclaimed(0.01); // reward otomatis
+                  return 100;
+                }
+                return prev + 2;
+              });
+            }, 200);
           }
-          if (password.length < 6) {
-            setError("Password minimal 6 karakter!");
-            return;
-          }
-          setError("");
-          setUser({ name: email, ref: "Self" });
-          window.location.hash = "#/dashboard";
+          return () => clearInterval(interval);
+        }, [mining, progress]);
+
+        const startMining = () => {
+          setMining(true);
+          setProgress(0);
+          setUnclaimed(0);
+        };
+
+        const claimReward = () => {
+          setBalance((b) => b + unclaimed);
+          setUnclaimed(0);
+        };
+
+        return (
+          <div className="p-6 pb-24">
+            <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto text-center">
+              
+              {/* Balance */}
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner mb-4">
+                <p className="text-lg">Balance:</p>
+                <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
+              </div>
+
+              {/* Mining Animation */}
+              {mining && (
+                <div className="mb-4">
+                  <div className="flex justify-center items-center mb-2">
+                    <div className="animate-bounce text-4xl">⚡</div>
+                    <div className="animate-spin text-3xl ml-2">⛏️</div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-green-500 h-3 transition-all duration-200"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-gray-600">{progress}% Mining...</p>
+                </div>
+              )}
+
+              {/* Buttons */}
+              {!mining && unclaimed === 0 && (
+                <button
+                  onClick={startMining}
+                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-green-600 hover:bg-green-700 text-white"
+                >
+                  ⚡ Start Mining
+                </button>
+              )}
+
+              {!mining && unclaimed > 0 && (
+                <button
+                  onClick={claimReward}
+                  className="mt-4 w-full py-3 rounded-xl font-bold shadow-lg bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  🎁 Claim {unclaimed.toFixed(3)} NKT
+                </button>
+              )}
+
+              {/* Referral */}
+              <div className="mt-6">
+                <h3 className="font-semibold">Referral Link:</h3>
+                <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
+                  {window.location.origin + "#/reg?ref=" + user.name}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ===== App Router =====
+      const App = () => {
+        const [user, setUser] = useState(null);
+        const [route, setRoute] = useState(window.location.hash);
+
+        useEffect(() => {
+          const onHashChange = () => setRoute(window.location.hash);
+          window.addEventListener("hashchange", onHashChange);
+          return () => window.removeEventListener("hashchange", onHashChange);
+        }, []);
+
+        if (!user) {
+          if (route.startsWith("#/reg")) return <Register onRegister={setUser} />;
+          return <Login onLogin={setUser} />;
         }
 
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="bg-white text-gray-900 p-6 rounded-2xl shadow-xl w-80 text-center">
-              <h1 className="text-2xl font-bold mb-4">Login</h1>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border rounded-lg p-2 mb-3"
-              />
-              {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-              <button
-                onClick={handleLogin}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg w-full font-semibold"
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        );
-      };
-
-      const Dashboard = ({ user, balance, mining, setMining, tab, setTab }) => {
-        return (
-          <div className="flex flex-col min-h-screen">
-            <div className="flex-1 p-6">
-              {tab === "home" && (
-                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-                  <h2 className="text-xl font-bold mb-2">Selamat Datang</h2>
-                  <p className="text-gray-600">Halo, {user.name} 👋</p>
-                </div>
-              )}
-
-              {tab === "mining" && (
-                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl">
-                    <p className="text-lg">Balance:</p>
-                    <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
-                  </div>
-                  <button
-                    onClick={() => setMining(!mining)}
-                    className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${
-                      mining
-                        ? "bg-red-600 hover:bg-red-700"
-                        : "bg-green-600 hover:bg-green-700"
-                    } text-white`}
-                  >
-                    {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
-                  </button>
-                </div>
-              )}
-
-              {tab === "wallet" && (
-                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-                  <h2 className="text-xl font-bold mb-4">Wallet</h2>
-                  <p className="mb-2">Balance Anda:</p>
-                  <p className="text-2xl font-bold text-indigo-600">
-                    {balance.toFixed(3)} NKT
-                  </p>
-                </div>
-              )}
-
-              {tab === "profile" && (
-                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-                  <h2 className="text-xl font-bold mb-4">Profil</h2>
-                  <p>Username: {user.name}</p>
-                  <p className="mt-2 text-sm text-gray-500">Referral Anda:</p>
-                  <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
-                    {window.location.origin + "#/reg?ref=" + user.name}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around py-3">
-              <button
-                onClick={() => setTab("home")}
-                className={`flex flex-col items-center ${
-                  tab === "home" ? "text-indigo-600" : "text-gray-500"
-                }`}
-              >
-                🏠 <span className="text-xs">Home</span>
-              </button>
-              <button
-                onClick={() => setTab("mining")}
-                className={`flex flex-col items-center ${
-                  tab === "mining" ? "text-indigo-600" : "text-gray-500"
-                }`}
-              >
-                ⚡ <span className="text-xs">Mining</span>
-              </button>
-              <button
-                onClick={() => setTab("wallet")}
-                className={`flex flex-col items-center ${
-                  tab === "wallet" ? "text-indigo-600" : "text-gray-500"
-                }`}
-              >
-                💰 <span className="text-xs">Wallet</span>
-              </button>
-              <button
-                onClick={() => setTab("profile")}
-                className={`flex flex-col items-center ${
-                  tab === "profile" ? "text-indigo-600" : "text-gray-500"
-                }`}
-              >
-                👤 <span className="text-xs">Profile</span>
-              </button>
-            </div>
-          </div>
-        );
+        return <Dashboard user={user} />;
       };
 
       ReactDOM.createRoot(document.getElementById("root")).render(<App />);
