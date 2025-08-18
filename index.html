@@ -20,6 +20,7 @@
         const [user, setUser] = useState(null);
         const [balance, setBalance] = useState(0);
         const [mining, setMining] = useState(false);
+        const [tab, setTab] = useState("home");
 
         useEffect(() => {
           function handleHashChange() {
@@ -50,6 +51,8 @@
               balance={balance}
               mining={mining}
               setMining={setMining}
+              tab={tab}
+              setTab={setTab}
             />
           );
 
@@ -172,34 +175,96 @@
         );
       };
 
-      const Dashboard = ({ user, balance, mining, setMining }) => (
-        <div className="p-6 pb-24">
-          <div className="bg-white text-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-inner">
-              <p className="text-lg">Balance:</p>
-              <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
+      const Dashboard = ({ user, balance, mining, setMining, tab, setTab }) => {
+        return (
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1 p-6">
+              {tab === "home" && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <h2 className="text-xl font-bold mb-2">Selamat Datang</h2>
+                  <p className="text-gray-600">Halo, {user.name} 👋</p>
+                </div>
+              )}
+
+              {tab === "mining" && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl">
+                    <p className="text-lg">Balance:</p>
+                    <h2 className="text-3xl font-bold">{balance.toFixed(3)} NKT</h2>
+                  </div>
+                  <button
+                    onClick={() => setMining(!mining)}
+                    className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${
+                      mining
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-green-600 hover:bg-green-700"
+                    } text-white`}
+                  >
+                    {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
+                  </button>
+                </div>
+              )}
+
+              {tab === "wallet" && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <h2 className="text-xl font-bold mb-4">Wallet</h2>
+                  <p className="mb-2">Balance Anda:</p>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {balance.toFixed(3)} NKT
+                  </p>
+                </div>
+              )}
+
+              {tab === "profile" && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <h2 className="text-xl font-bold mb-4">Profil</h2>
+                  <p>Username: {user.name}</p>
+                  <p className="mt-2 text-sm text-gray-500">Referral Anda:</p>
+                  <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
+                    {window.location.origin + "#/reg?ref=" + user.name}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <button
-              onClick={() => setMining(!mining)}
-              className={`mt-6 w-full py-3 rounded-xl font-bold shadow-lg ${
-                mining
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-green-600 hover:bg-green-700"
-              } text-white`}
-            >
-              {mining ? "⛔ Stop Mining" : "⚡ Start Mining"}
-            </button>
-
-            <div className="mt-6">
-              <h3 className="font-semibold">Referral Link:</h3>
-              <p className="text-sm break-all bg-gray-100 text-gray-800 p-2 rounded mt-2">
-                {window.location.origin + "#/reg?ref=" + user.name}
-              </p>
+            {/* Bottom Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around py-3">
+              <button
+                onClick={() => setTab("home")}
+                className={`flex flex-col items-center ${
+                  tab === "home" ? "text-indigo-600" : "text-gray-500"
+                }`}
+              >
+                🏠 <span className="text-xs">Home</span>
+              </button>
+              <button
+                onClick={() => setTab("mining")}
+                className={`flex flex-col items-center ${
+                  tab === "mining" ? "text-indigo-600" : "text-gray-500"
+                }`}
+              >
+                ⚡ <span className="text-xs">Mining</span>
+              </button>
+              <button
+                onClick={() => setTab("wallet")}
+                className={`flex flex-col items-center ${
+                  tab === "wallet" ? "text-indigo-600" : "text-gray-500"
+                }`}
+              >
+                💰 <span className="text-xs">Wallet</span>
+              </button>
+              <button
+                onClick={() => setTab("profile")}
+                className={`flex flex-col items-center ${
+                  tab === "profile" ? "text-indigo-600" : "text-gray-500"
+                }`}
+              >
+                👤 <span className="text-xs">Profile</span>
+              </button>
             </div>
           </div>
-        </div>
-      );
+        );
+      };
 
       ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
