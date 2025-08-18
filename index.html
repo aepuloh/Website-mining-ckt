@@ -34,108 +34,28 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.45);
     }
 
-    /* layout */
     .app { display:flex; flex-direction:column; height:100%; }
-    .center-screen { display:flex; align-items:center; justify-content:center; height:100%; }
+    .page { position:absolute; inset:18px; border-radius:14px; opacity:0; pointer-events:none; display:flex; align-items:center; justify-content:center; transition:all .4s ease; }
+    .page.active{opacity:1; pointer-events:auto;}
 
     /* header */
     header.app-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; }
     .logo { display:flex; align-items:center; gap:10px; }
-    .logo .dot { width:10px; height:10px; border-radius:50%; background:linear-gradient(90deg,var(--accent),var(--accent2)); box-shadow:0 6px 20px rgba(0,242,255,0.06); }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
     .logo h1 { margin:0; font-weight:700; font-size:16px; color:#eafcff; }
 
-    /* pages area */
-    .pages { flex:1; position:relative; padding:18px; display:flex; align-items:stretch; justify-content:center; overflow:hidden; }
-    .page {
-      position:absolute; inset:18px; border-radius:14px; overflow:hidden;
-      transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s ease;
-      opacity:0; transform: translateY(8px) scale(.995);
-      pointer-events:none;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .page.active { opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
+    /* miner */
+    .miner-card { width:100%; max-width:980px; padding:22px; border-radius:14px; display:flex; gap:20px; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); }
+    .miner-visual { width:320px; height:200px; border-radius:12px; background:rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; position:relative; }
 
-    .enter-left { transform: translateX(-18px); }
-    .enter-right { transform: translateX(18px); }
+    /* tabbar */
+    .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;width:calc(100% - 40px);max-width:980px;display:flex;gap:8px;justify-content:center;padding:10px;background:rgba(0,0,0,0.32);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.45);z-index:999;}
+    .tab{padding:8px 12px;border-radius:10px;cursor:pointer;}
+    .tab.active{background:linear-gradient(90deg,rgba(0,242,255,0.06),rgba(139,92,246,0.04));}
 
-    /* miner card */
-    .miner-card {
-      width:100%; max-width:980px; padding:22px; border-radius:14px;
-      display:flex; gap:20px; align-items:center; justify-content:space-between;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.03);
-    }
-
-    /* visual */
-    .miner-visual { width:360px; height:220px; position:relative; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-    .strip {
-      position:absolute; inset:0; background:repeating-linear-gradient(120deg, rgba(255,255,255,0.01) 0 6px, rgba(0,0,0,0.02) 6px 12px);
-      mix-blend-mode:overlay; animation:stripmove 3.4s linear infinite;
-    }
-    @keyframes stripmove { from{ background-position:0 0 } to { background-position:240px 0 } }
-
-    .core-ring {
-      width:120px; height:120px; border-radius:50%;
-      background: conic-gradient(from 120deg, rgba(0,242,255,0.12), rgba(139,92,246,0.09), rgba(0,242,255,0.05));
-      display:grid; place-items:center; box-shadow:0 8px 30px rgba(0,242,255,0.06);
-      animation:spin 6s linear infinite;
-      border:1px solid rgba(255,255,255,0.03);
-    }
-    @keyframes spin { from{ transform:rotate(0deg) } to{ transform:rotate(360deg) } }
-
-    .core-glow { position:absolute; width:200px; height:200px; border-radius:999px; filter:blur(24px); background:linear-gradient(90deg,var(--accent),var(--accent2)); opacity:.08; }
-
-    .spark { position:absolute; width:6px; height:6px; border-radius:50%; background:linear-gradient(90deg,#ffd87a,#ff6b6b); box-shadow:0 0 12px rgba(255,110,60,0.8); opacity:0; transform:translate(-50%,-50%) scale(.6); animation: spark 1200ms linear forwards; }
-    @keyframes spark { 0%{ opacity:0; transform:translate(-50%,-50%) scale(.2) translateY(0)} 15%{opacity:1} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.2) translateY(-120px)} }
-
-    /* progress */
-    .progress-wrap { width:380px; max-width:48%; display:flex; flex-direction:column; gap:12px; }
-    .progress-bar { height:14px; background:rgba(255,255,255,0.04); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);}
-    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s linear; box-shadow:0 6px 22px rgba(124,58,237,0.06) inset; }
-
-    /* buttons */
-    .btn { padding:.6rem .85rem; border-radius:10px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.04); }
-    .btn-start { background:linear-gradient(90deg,#16a34a,#60a5fa); color:#041124; }
-    .btn-stop { background:linear-gradient(90deg,#ff6b6b,#ffd87a); color:#041124; }
-
-    /* mini cards */
-    .mini-card { width:280px; max-width:80%; padding:12px; border-radius:12px; text-align:center; }
-
-    /* tabbar (dinaikkan sedikit) */
-    .tabbar {
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:22px; /* dinaikkan dari 0 => 22px */
-      width:calc(100% - 40px);
-      max-width:980px;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      padding:10px;
-      background:rgba(0,0,0,0.32);
-      border-radius:14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-      z-index:999;
-    }
-    .tab { padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .28s ease; color:rgba(255,255,255,0.88); }
-    .tab.active { background:linear-gradient(90deg, rgba(0,242,255,0.06), rgba(139,92,246,0.04)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
-
-    /* login/register modal */
     .auth-wrap { width:420px; max-width:92vw; }
-    .field { width:100%; padding:.6rem; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#e6eef8; margin-bottom:8px; }
-
-    /* profile compact */
-    .profile-value { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; }
-
-    /* responsive */
-    @media (max-width:880px){
-      .miner-card{ flex-direction:column; gap:18px; align-items:center; padding:18px; }
-      .progress-wrap{ width:100%; max-width:100%; }
-      .miner-visual{ width:100%; height:200px; }
-      .tabbar { width:calc(100% - 28px); bottom:14px; }
-    }
+    .field{width:100%;padding:.6rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#e6eef8;margin-bottom:8px;}
+    .profile-value{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;}
   </style>
 </head>
 <body>
@@ -143,45 +63,34 @@
 
     <!-- HEADER -->
     <header class="app-header">
-      <div class="logo">
-        <div class="dot"></div>
-        <h1>Fire-Mining</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <div id="headerUser" class="text-sm opacity-80">Guest</div>
-      </div>
+      <div class="logo"><div class="dot"></div><h1>Fire-Mining</h1></div>
+      <div id="headerUser" class="text-sm opacity-80">Guest</div>
     </header>
 
     <!-- PAGES -->
     <main class="pages">
 
-      <!-- AUTH SCREEN -->
-      <section id="authPage" class="page active" style="position:relative;display:flex;align-items:center;justify-content:center;">
+      <!-- AUTH -->
+      <section id="authPage" class="page active">
         <div class="glass auth-wrap p-6">
           <h2 class="text-lg font-semibold mb-3 text-center">Masuk atau Daftar</h2>
-
-          <!-- Toggle buttons -->
           <div class="flex gap-3 mb-4">
             <button id="btnShowLogin" class="btn w-full">Login</button>
             <button id="btnShowRegister" class="btn w-full">Register</button>
             <button id="btnShowForgot" class="btn w-full">Lupa Password</button>
           </div>
-
           <!-- LOGIN -->
           <div id="loginBlock">
             <input id="loginEmail" class="field" type="email" placeholder="Email" />
             <input id="loginUsername" class="field" type="text" placeholder="Username" />
             <input id="loginPassword" class="field" type="password" placeholder="Kata sandi" />
-
             <div class="flex items-center gap-3 mb-2">
               <div id="captchaText" class="font-mono bg-black/20 px-3 py-2 rounded select-all"></div>
               <button id="refreshCaptcha" class="btn">↻</button>
-              <input id="captchaInput" class="field" style="flex:1;margin-bottom:0;" placeholder="Masukkan captcha" />
+              <input id="captchaInput" class="field flex-1" placeholder="Masukkan captcha" />
             </div>
-
             <button id="btnLogin" class="btn btn-start w-full mt-3">Login</button>
           </div>
-
           <!-- REGISTER -->
           <div id="registerBlock" style="display:none;">
             <input id="regEmail" class="field" type="email" placeholder="Email" />
@@ -189,108 +98,157 @@
             <input id="regPassword" class="field" type="password" placeholder="Kata sandi" />
             <button id="btnRegister" class="btn w-full mt-2">Daftar</button>
           </div>
-
-          <!-- FORGOT PASSWORD -->
+          <!-- FORGOT -->
           <div id="forgotBlock" style="display:none;">
             <input id="forgotEmail" class="field" type="email" placeholder="Masukkan email untuk reset" />
             <button id="btnForgot" class="btn w-full mt-2">Kirim Link Reset (simulasi)</button>
-            <p class="text-xs opacity-70 mt-2">Jika email terdaftar, simulasi akan mengirim link reset.</p>
           </div>
         </div>
       </section>
 
       <!-- HOME -->
-      <section id="homePage" class="page" aria-hidden>
+      <section id="homePage" class="page">
         <div class="miner-card glass">
-          <div style="flex:1">
+          <div>
             <h3 class="text-lg font-semibold mb-1">Welcome back</h3>
-            <p class="text-sm opacity-80 mb-4">Ringkasan mining & akses cepat</p>
-
+            <p class="text-sm opacity-80 mb-4">Ringkasan mining</p>
             <div class="mini-card glass mx-auto">
-              <div class="text-sm opacity-80">Saldo (wallet + unclaimed)</div>
+              <div class="text-sm opacity-80">Saldo</div>
               <div id="homeBalance" class="text-2xl font-mono mt-1">0.000000 KOT</div>
             </div>
-
             <div class="mt-4 flex gap-3">
-              <button class="btn btn-start" onclick="startMining()">⛏️ Start Mining</button>
-              <button class="btn" onclick="showPage('miningPage')">Lihat Mining</button>
-            </div>
-          </div>
-          <div style="width:44%; display:flex; align-items:center; justify-content:center">
-            <div class="miner-visual">
-              <div class="core-glow"></div>
-              <div class="strip"></div>
-              <div class="core-ring" aria-hidden></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- MINING -->
-      <section id="miningPage" class="page" aria-hidden>
-        <div class="miner-card glass">
-          <div class="miner-visual" style="min-width:320px">
-            <div class="strip"></div>
-            <div class="core-glow"></div>
-            <div class="core-ring" id="coreRing"></div>
-            <div style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); color:#dffaff; font-family:monospace; font-size:13px;">
-              <div id="hashrate">0 H/s</div>
-              <div style="font-size:11px; opacity:0.75;">Realtime Hashrate</div>
-            </div>
-          </div>
-
-          <div class="progress-wrap">
-            <div class="text-sm opacity-80">Mining Progress</div>
-            <div class="progress-bar">
-              <div id="progressFill" class="progress-fill" style="width:0%" data-val="0"></div>
-            </div>
-
-            <div class="text-sm opacity-80">Unclaimed: <span id="unclaimed">0.000000</span> KOT</div>
-
-            <div class="mt-2 flex gap-2">
-              <button id="startBtn" class="btn btn-start" onclick="startMining()">Start</button>
-              <button id="stopBtn" class="btn btn-stop" onclick="stopMining()" style="display:none">Stop</button>
+              <button id="startBtn" class="btn btn-start" onclick="startMining()">⛏️ Start</button>
+              <button id="stopBtn" class="btn btn-stop hidden" onclick="stopMining()">Stop</button>
               <button class="btn" onclick="claim()">Claim</button>
             </div>
           </div>
+          <div class="miner-visual"><div id="hashrate">0 H/s</div></div>
         </div>
       </section>
 
       <!-- WALLET -->
-      <section id="walletPage" class="page" aria-hidden>
-        <div class="miner-card glass" style="flex-direction:column; align-items:center; padding:26px;">
+      <section id="walletPage" class="page">
+        <div class="miner-card glass flex-col items-center">
           <h3 class="text-lg mb-2">Wallet</h3>
           <div class="mini-card glass">
             <div class="text-sm opacity-80">Total Balance</div>
             <div id="walletBalance" class="text-2xl font-mono mt-1">0.000000</div>
           </div>
-          <div class="mt-4 w-full max-w-md text-sm opacity-70">Riwayat transaksi demo akan muncul disini.</div>
         </div>
       </section>
 
       <!-- PROFILE -->
-      <section id="profilePage" class="page" aria-hidden>
-        <div class="miner-card glass" style="flex-direction:column; align-items:center; padding:18px; max-width:480px;">
+      <section id="profilePage" class="page">
+        <div class="miner-card glass flex-col items-center max-w-md">
           <h3 class="text-cyan-300">Profile</h3>
-          <div style="width:100%; margin-top:10px">
-            <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-              <div class="opacity-80 text-sm">Email</div>
-              <div id="profileEmail" class="profile-value"></div>
-            </div>
-
-            <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
-              <div class="opacity-80 text-sm">Username</div>
-              <div id="profileName" class="profile-value"></div>
-            </div>
-
-            <button onclick="logout()" class="btn btn-stop" style="width:100%; margin-top:14px">Logout</button>
-          </div>
+          <div class="glass p-2 mt-3 flex justify-between"><div>Email</div><div id="profileEmail" class="profile-value"></div></div>
+          <div class="glass p-2 mt-3 flex justify-between"><div>Username</div><div id="profileName" class="profile-value"></div></div>
+          <button onclick="logout()" class="btn btn-stop w-full mt-4">Logout</button>
         </div>
       </section>
 
     </main>
 
-    <!-- TABBAR (disembunyikan default) -->
-    <nav id="tabbar" class="tabbar hidden" role="navigation" aria-label="Main Tabs">
+    <!-- TABBAR -->
+    <nav id="tabbar" class="tabbar hidden">
       <div class="tab active" data-page="homePage" onclick="onTabClick(event)">🏠 Home</div>
-      <div class="tab" data
+      <div class="tab" data-page="walletPage" onclick="onTabClick(event)">💰 Wallet</div>
+      <div class="tab" data-page="profilePage" onclick="onTabClick(event)">👤 Profile</div>
+    </nav>
+
+  </div>
+
+<script>
+let miningInterval=null, unclaimed=0, balance=0, currentCaptcha="";
+
+/* Captcha */
+function generateCaptcha(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let text=""; for(let i=0;i<5;i++) text+=chars[Math.floor(Math.random()*chars.length)];
+  currentCaptcha=text;
+  document.getElementById("captchaText").innerText=text;
+}
+
+/* Mining */
+function startMining(){
+  if(miningInterval) return;
+  miningInterval=setInterval(()=>{
+    unclaimed+=0.00001;
+    document.getElementById("unclaimed")?.innerText=unclaimed.toFixed(6);
+    document.getElementById("hashrate").innerText=(Math.random()*100+50).toFixed(2)+" H/s";
+    updateUI();
+  },1000);
+  document.getElementById("startBtn").classList.add("hidden");
+  document.getElementById("stopBtn").classList.remove("hidden");
+}
+function stopMining(){
+  clearInterval(miningInterval); miningInterval=null;
+  document.getElementById("startBtn").classList.remove("hidden");
+  document.getElementById("stopBtn").classList.add("hidden");
+  document.getElementById("hashrate").innerText="0 H/s";
+}
+function claim(){balance+=unclaimed;unclaimed=0;updateUI();}
+
+/* UI */
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.page===id));
+}
+function onTabClick(e){showPage(e.currentTarget.dataset.page);}
+function updateUI(){
+  document.getElementById("walletBalance").innerText=balance.toFixed(6)+" KOT";
+  document.getElementById("homeBalance").innerText=(balance+unclaimed).toFixed(6)+" KOT";
+  localStorage.setItem("balance",balance);
+}
+
+/* Auth */
+function logout(){
+  localStorage.removeItem("auth_user");localStorage.removeItem("username");localStorage.removeItem("email");
+  location.reload();
+}
+function onAppStart(){
+  const u=localStorage.getItem("auth_user"),un=localStorage.getItem("username"),em=localStorage.getItem("email"),b=parseFloat(localStorage.getItem("balance")||"0");
+  balance=isNaN(b)?0:b;
+  if(u&&un){
+    document.getElementById("authPage").classList.remove("active");
+    document.getElementById("homePage").classList.add("active");
+    document.getElementById("tabbar").classList.remove("hidden");
+    document.getElementById("profileEmail").innerText=em;
+    document.getElementById("profileName").innerText=un;
+    document.getElementById("headerUser").innerText=un;
+    updateUI();
+  } else {
+    document.getElementById("authPage").classList.add("active");
+    document.getElementById("tabbar").classList.add("hidden");
+  }
+}
+
+/* Auth events */
+btnShowLogin.onclick=()=>{loginBlock.style.display="block";registerBlock.style.display="none";forgotBlock.style.display="none";};
+btnShowRegister.onclick=()=>{loginBlock.style.display="none";registerBlock.style.display="block";forgotBlock.style.display="none";};
+btnShowForgot.onclick=()=>{loginBlock.style.display="none";registerBlock.style.display="none";forgotBlock.style.display="block";};
+
+btnRegister.onclick=()=>{
+  const em=regEmail.value.trim(),un=regUsername.value.trim(),pw=regPassword.value.trim();
+  if(!em||!un||!pw) return alert("Isi semua field!");
+  localStorage.setItem("email",em);localStorage.setItem("username",un);localStorage.setItem("password",pw);localStorage.setItem("auth_user",true);
+  onAppStart();
+};
+btnLogin.onclick=()=>{
+  const em=loginEmail.value.trim(),un=loginUsername.value.trim(),pw=loginPassword.value.trim(),cap=captchaInput.value.trim();
+  if(cap!==currentCaptcha) return alert("Captcha salah!");
+  if(localStorage.getItem("email")===em&&localStorage.getItem("username")===un&&localStorage.getItem("password")===pw){
+    localStorage.setItem("auth_user",true);onAppStart();
+  }else alert("Login gagal!");
+};
+btnForgot.onclick=()=>{
+  const em=forgotEmail.value.trim();
+  if(em&&localStorage.getItem("email")===em) alert("Simulasi: Link reset terkirim ke "+em); else alert("Email tidak terdaftar.");
+};
+refreshCaptcha.onclick=()=>generateCaptcha();
+
+window.onload=()=>{generateCaptcha();onAppStart();};
+</script>
+</body>
+</html>
