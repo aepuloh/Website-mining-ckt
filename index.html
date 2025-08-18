@@ -3,201 +3,226 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fire-Mining — Animated</title>
+  <title>Fire-Mining — Full App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{
-      --bg1:#0f1724; --bg2:#0b1220; --accent:#00f2ff; --accent2:#7C3AED;
-      --card:#0f1724aa;
+      --bg1:#071122; --bg2:#081426; --accent:#00f2ff; --accent2:#8b5cf6;
     }
     html,body{height:100%}
     body{
       margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent 8%),
-                  radial-gradient(1000px 500px at 90% 90%, rgba(0,242,255,0.06), transparent 8%),
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(800px 400px at 10% 10%, rgba(139,92,246,0.06), transparent 8%),
+                  radial-gradient(700px 300px at 90% 90%, rgba(0,242,255,0.04), transparent 8%),
                   linear-gradient(180deg,var(--bg1),var(--bg2));
       color:#e6eef8;
+      display:flex;
+      flex-direction:column;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
-      display:flex; flex-direction:column; height:100vh; overflow:hidden;
+      height:100vh;
+      overflow:hidden;
     }
 
-    /* Generic glass card */
+    /* Glass card */
     .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
       border: 1px solid rgba(255,255,255,0.04);
       backdrop-filter: blur(8px);
-      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      border-radius:12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
     }
 
-    /* Page container */
-    .app-body { flex:1; display:flex; flex-direction:column; }
+    /* layout */
+    .app { display:flex; flex-direction:column; height:100%; }
+    .center-screen { display:flex; align-items:center; justify-content:center; height:100%; }
 
     /* header */
-    .app-header { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    header.app-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; }
     .logo { display:flex; align-items:center; gap:10px; }
-    .logo .dot { width:10px; height:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:50%; box-shadow:0 0 12px var(--accent); }
-    .logo h1{ font-weight:700; font-size:18px; margin:0; color: #eafcff; text-shadow:0 6px 18px rgba(0,242,255,0.06); }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background:linear-gradient(90deg,var(--accent),var(--accent2)); box-shadow:0 6px 20px rgba(0,242,255,0.06); }
+    .logo h1 { margin:0; font-weight:700; font-size:16px; color:#eafcff; }
 
     /* pages area */
-    .pages { flex:1; position:relative; padding:18px; display:flex; align-items:stretch; justify-content:center; }
-
+    .pages { flex:1; position:relative; padding:18px; display:flex; align-items:stretch; justify-content:center; overflow:hidden; }
     .page {
       position:absolute; inset:18px; border-radius:14px; overflow:hidden;
-      display:flex; align-items:center; justify-content:center; transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s ease;
+      transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s ease;
       opacity:0; transform: translateY(8px) scale(.995);
       pointer-events:none;
+      display:flex; align-items:center; justify-content:center;
     }
     .page.active { opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
 
-    /* animated transition when switching */
-    .page.enter-right { transform: translateX(20px); }
-    .page.enter-left { transform: translateX(-20px); }
+    .enter-left { transform: translateX(-18px); }
+    .enter-right { transform: translateX(18px); }
 
-    /* Mining machine card */
+    /* miner card */
     .miner-card {
-      width:100%; max-width:760px; padding:28px; border-radius:14px;
-      display:flex; gap:22px; align-items:center; justify-content:space-between;
+      width:100%; max-width:980px; padding:22px; border-radius:14px;
+      display:flex; gap:20px; align-items:center; justify-content:space-between;
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.03);
     }
 
-    .miner-visual { width: 320px; height:200px; position:relative; border-radius:12px; overflow:hidden; }
-    /* animated stripes for "machine" */
-    .machine-core {
-      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    }
+    /* visual */
+    .miner-visual { width:360px; height:220px; position:relative; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
     .strip {
       position:absolute; inset:0; background:repeating-linear-gradient(120deg, rgba(255,255,255,0.01) 0 6px, rgba(0,0,0,0.02) 6px 12px);
-      mix-blend-mode:overlay; animation:strip-move 3s linear infinite;
-      opacity:.9;
+      mix-blend-mode:overlay; animation:stripmove 3.4s linear infinite;
     }
-    @keyframes strip-move { from{ background-position:0 0 } to { background-position:200px 0 } }
+    @keyframes stripmove { from{ background-position:0 0 } to { background-position:240px 0 } }
 
-    /* rotating core */
     .core-ring {
-      width:110px; height:110px; border-radius:50%; display:grid; place-items:center;
-      background: conic-gradient(from 120deg, rgba(0,242,255,0.14), rgba(124,58,237,0.12), rgba(0,242,255,0.06));
-      box-shadow: 0 6px 30px rgba(0,242,255,0.06), inset 0 2px 8px rgba(255,255,255,0.02);
+      width:120px; height:120px; border-radius:50%;
+      background: conic-gradient(from 120deg, rgba(0,242,255,0.12), rgba(139,92,246,0.09), rgba(0,242,255,0.05));
+      display:grid; place-items:center; box-shadow:0 8px 30px rgba(0,242,255,0.06);
       animation:spin 6s linear infinite;
-      border:1px solid rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.03);
     }
     @keyframes spin { from{ transform:rotate(0deg) } to{ transform:rotate(360deg) } }
 
-    .core-glow { width:70px; height:70px; border-radius:50%; background:linear-gradient(90deg,var(--accent),var(--accent2)); filter:blur(10px); opacity:.12; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; }
+    .core-glow { position:absolute; width:200px; height:200px; border-radius:999px; filter:blur(24px); background:linear-gradient(90deg,var(--accent),var(--accent2)); opacity:.08; }
 
-    /* sparks */
-    .spark {
-      position:absolute; width:6px; height:6px; border-radius:50%;
-      background: linear-gradient(90deg, #ffd87a, #ff6b6b);
-      box-shadow: 0 0 12px rgba(255,110,60,0.7);
-      opacity:0; transform:translate(-50%,-50%) scale(.6);
-      animation: spark-fly 1200ms linear infinite;
-    }
-    @keyframes spark-fly {
-      0% { opacity:0; transform:translate(-50%,-50%) scale(.3) translateY(0px) }
-      20% { opacity:1 }
-      100% { opacity:0; transform:translate(-50%,-50%) scale(1.1) translateY(-90px) }
-    }
+    .spark { position:absolute; width:6px; height:6px; border-radius:50%; background:linear-gradient(90deg,#ffd87a,#ff6b6b); box-shadow:0 0 12px rgba(255,110,60,0.8); opacity:0; transform:translate(-50%,-50%) scale(.6); animation: spark 1200ms linear forwards; }
+    @keyframes spark { 0%{ opacity:0; transform:translate(-50%,-50%) scale(.2) translateY(0)} 15%{opacity:1} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.2) translateY(-120px)} }
 
-    /* progress bar */
-    .progress-wrap { width:320px; max-width:48%; display:flex; flex-direction:column; gap:12px; }
+    /* progress */
+    .progress-wrap { width:380px; max-width:48%; display:flex; flex-direction:column; gap:12px; }
     .progress-bar { height:14px; background:rgba(255,255,255,0.04); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);}
-    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s linear; box-shadow:0 6px 30px rgba(124,58,237,0.08) inset;}
-    .stat { font-family:monospace; opacity:.9; }
+    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s linear; box-shadow:0 6px 22px rgba(124,58,237,0.06) inset; }
 
     /* buttons */
-    .btn { padding:.6rem .9rem; border-radius:10px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.04); }
-    .btn-start { background:linear-gradient(90deg,#12c2e9,#c471ed); color:#041124; box-shadow:0 6px 18px rgba(0,0,0,0.5); }
+    .btn { padding:.6rem .85rem; border-radius:10px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.04); }
+    .btn-start { background:linear-gradient(90deg,#16a34a,#60a5fa); color:#041124; }
     .btn-stop { background:linear-gradient(90deg,#ff6b6b,#ffd87a); color:#041124; }
 
-    /* Wallet & Home small card */
-    .mini-card { width:300px; max-width:80%; padding:14px; border-radius:12px; text-align:center; }
+    /* mini cards */
+    .mini-card { width:280px; max-width:80%; padding:12px; border-radius:12px; text-align:center; }
 
-    /* Tabbar */
-    .tabbar { display:flex; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(0,0,0,0.35); border-top:1px solid rgba(255,255,255,0.03); }
-    .tab { padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .25s ease; color:rgba(255,255,255,0.85); }
-    .tab.active { background:linear-gradient(90deg, rgba(0,242,255,0.08), rgba(124,58,237,0.06)); transform:translateY(-4px); box-shadow:0 8px 28px rgba(0,0,0,0.45); }
+    /* tabbar */
+    .tabbar { display:flex; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(0,0,0,0.32); border-top:1px solid rgba(255,255,255,0.02); }
+    .tab { padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .28s ease; color:rgba(255,255,255,0.88); }
+    .tab.active { background:linear-gradient(90deg, rgba(0,242,255,0.06), rgba(139,92,246,0.04)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
+
+    /* login/register modal */
+    .auth-wrap { width:420px; max-width:92vw; }
+    .field { width:100%; padding:.6rem; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#e6eef8; margin-bottom:8px; }
+
+    /* profile compact */
+    .profile-value { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; }
 
     /* responsive */
-    @media (max-width:640px){
-      .miner-card{ flex-direction:column; gap:16px; align-items:center; }
-      .progress-wrap{ max-width:100%; width:100%; }
+    @media (max-width:880px){
+      .miner-card{ flex-direction:column; gap:18px; align-items:center; padding:18px; }
+      .progress-wrap{ width:100%; max-width:100%; }
+      .miner-visual{ width:100%; height:200px; }
     }
   </style>
 </head>
 <body>
-  <div class="app-body">
+  <div class="app">
 
-    <!-- Header -->
+    <!-- HEADER -->
     <header class="app-header">
       <div class="logo">
         <div class="dot"></div>
         <h1>Fire-Mining</h1>
       </div>
       <div class="flex items-center gap-3">
-        <div class="text-sm opacity-80" id="headerUser">Guest</div>
+        <div id="headerUser" class="text-sm opacity-80">Guest</div>
       </div>
     </header>
 
-    <!-- Pages -->
+    <!-- PAGES -->
     <main class="pages">
+
+      <!-- AUTH SCREEN (LOGIN/REGISTER) -->
+      <section id="authPage" class="page active" style="position:relative;display:flex;align-items:center;justify-content:center;">
+        <div class="glass auth-wrap p-6">
+          <h2 class="text-lg font-semibold mb-3 text-center">Masuk atau Daftar</h2>
+
+          <!-- Toggle buttons -->
+          <div class="flex gap-3 mb-4">
+            <button id="btnShowLogin" class="btn w-full">Login</button>
+            <button id="btnShowRegister" class="btn w-full">Register</button>
+          </div>
+
+          <!-- LOGIN -->
+          <div id="loginBlock">
+            <input id="loginEmail" class="field" type="email" placeholder="Email" />
+            <input id="loginUsername" class="field" type="text" placeholder="Username" />
+            <input id="loginPassword" class="field" type="password" placeholder="Kata sandi" />
+
+            <div class="flex items-center gap-3 mb-2">
+              <div id="captchaText" class="font-mono bg-black/20 px-3 py-2 rounded select-all"></div>
+              <button id="refreshCaptcha" class="btn">↻</button>
+              <input id="captchaInput" class="field" style="flex:1;margin-bottom:0;" placeholder="Masukkan captcha" />
+            </div>
+
+            <button id="btnLogin" class="btn btn-start w-full mt-3">Login</button>
+          </div>
+
+          <!-- REGISTER -->
+          <div id="registerBlock" style="display:none;">
+            <input id="regEmail" class="field" type="email" placeholder="Email" />
+            <input id="regUsername" class="field" type="text" placeholder="Username" />
+            <input id="regPassword" class="field" type="password" placeholder="Kata sandi" />
+            <button id="btnRegister" class="btn w-full mt-2">Daftar</button>
+            <p class="text-xs opacity-70 mt-2">Data demo disimpan di browser (localStorage).</p>
+          </div>
+        </div>
+      </section>
+
       <!-- HOME -->
-      <section id="homePage" class="page active">
-        <div class="glass miner-card">
+      <section id="homePage" class="page" aria-hidden>
+        <div class="miner-card glass">
           <div style="flex:1">
-            <h3 class="text-lg font-semibold mb-2">Welcome back</h3>
+            <h3 class="text-lg font-semibold mb-1">Welcome back</h3>
             <p class="text-sm opacity-80 mb-4">Ringkasan mining & akses cepat</p>
 
-            <div class="mini-card glass">
+            <div class="mini-card glass mx-auto">
               <div class="text-sm opacity-80">Saldo</div>
-              <div id="homeBalance" class="text-2xl font-mono mt-1">0.0000 KOT</div>
+              <div id="homeBalance" class="text-2xl font-mono mt-1">0.000000 KOT</div>
             </div>
 
             <div class="mt-4 flex gap-3">
-              <button class="btn btn-start" onclick="startMining()"><span>⛏️ Start Mining</span></button>
-              <button class="btn" onclick="showPage('walletPage')">💰 Wallet</button>
+              <button class="btn btn-start" onclick="startMining()">⛏️ Start Mining</button>
+              <button class="btn" onclick="showPage('miningPage')">Lihat Mining</button>
             </div>
           </div>
-
-          <div style="width:42%; display:flex; align-items:center; justify-content:center">
-            <div class="machine-core miner-visual glass" aria-hidden>
-              <div class="strip"></div>
+          <div style="width:44%; display:flex; align-items:center; justify-content:center">
+            <div class="miner-visual">
               <div class="core-glow"></div>
-              <div class="core-ring">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M2 12h4M18 12h4M4.2 19.8l2.8-2.8M17 7l2.8-2.8" stroke="white" stroke-opacity=".7" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </div>
-              <!-- sparks (will be positioned by JS) -->
+              <div class="strip"></div>
+              <div class="core-ring" aria-hidden></div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- MINING -->
-      <section id="miningPage" class="page">
-        <div class="glass miner-card">
+      <section id="miningPage" class="page" aria-hidden>
+        <div class="miner-card glass">
           <div class="miner-visual" style="min-width:320px">
             <div class="strip"></div>
-            <div class="machine-core" style="z-index:2">
-              <div class="core-ring" id="coreRing"></div>
-              <div style="position:relative; z-index:5; text-align:center; margin-top:8px">
-                <div class="stat" id="hashrate">0 H/s</div>
-                <div class="stat opacity-80 text-sm">Realtime Hashrate</div>
-              </div>
-            </div>
             <div class="core-glow"></div>
-            <!-- sparks generated by JS -->
+            <div class="core-ring" id="coreRing"></div>
+            <!-- sparks by JS -->
+            <div style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); color:#dffaff; font-family:monospace; font-size:13px;">
+              <div id="hashrate">0 H/s</div>
+              <div style="font-size:11px; opacity:0.75;">Realtime Hashrate</div>
+            </div>
           </div>
 
           <div class="progress-wrap">
             <div class="text-sm opacity-80">Mining Progress</div>
             <div class="progress-bar">
-              <div id="progressFill" class="progress-fill" style="width:0%"></div>
+              <div id="progressFill" class="progress-fill" style="width:0%" data-val="0"></div>
             </div>
 
-            <div class="text-sm opacity-80">Unclaimed: <span id="unclaimed">0.0000</span> KOT</div>
+            <div class="text-sm opacity-80">Unclaimed: <span id="unclaimed">0.000000</span> KOT</div>
 
             <div class="mt-2 flex gap-2">
               <button id="startBtn" class="btn btn-start" onclick="startMining()">Start</button>
@@ -209,37 +234,40 @@
       </section>
 
       <!-- WALLET -->
-      <section id="walletPage" class="page">
-        <div class="glass miner-card" style="flex-direction:column; align-items:center; padding:28px 40px;">
+      <section id="walletPage" class="page" aria-hidden>
+        <div class="miner-card glass" style="flex-direction:column; align-items:center; padding:26px;">
           <h3 class="text-lg mb-2">Wallet</h3>
           <div class="mini-card glass">
             <div class="text-sm opacity-80">Total Balance</div>
-            <div id="walletBalance" class="text-2xl font-mono mt-1">0.0000 KOT</div>
+            <div id="walletBalance" class="text-2xl font-mono mt-1">0.000000</div>
           </div>
-          <div class="mt-4 w-full max-w-md text-sm opacity-80">Riwayat transaksi sederhana akan muncul di sini (demo).</div>
+          <div class="mt-4 w-full max-w-md text-sm opacity-70">Riwayat transaksi demo akan muncul disini.</div>
         </div>
       </section>
 
       <!-- PROFILE -->
-      <section id="profilePage" class="page">
-        <div class="glass miner-card" style="flex-direction:column; align-items:center; padding:20px; max-width:460px;">
+      <section id="profilePage" class="page" aria-hidden>
+        <div class="miner-card glass" style="flex-direction:column; align-items:center; padding:18px; max-width:480px;">
           <h3 class="text-cyan-300">Profile</h3>
           <div style="width:100%; margin-top:10px">
             <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
               <div class="opacity-80 text-sm">Email</div>
-              <div id="profileEmail" class="font-mono profile-value" style="max-width:190px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;"></div>
+              <div id="profileEmail" class="profile-value"></div>
             </div>
+
             <div class="glass" style="padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;">
               <div class="opacity-80 text-sm">Username</div>
-              <div id="profileName" class="font-mono" style="max-width:190px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;"></div>
+              <div id="profileName" class="profile-value"></div>
             </div>
+
             <button onclick="logout()" class="btn btn-stop" style="width:100%; margin-top:14px">Logout</button>
           </div>
         </div>
       </section>
+
     </main>
 
-    <!-- Tabbar -->
+    <!-- TABBAR -->
     <nav class="tabbar">
       <div class="tab active" data-page="homePage" onclick="onTabClick(event)">🏠 Home</div>
       <div class="tab" data-page="miningPage" onclick="onTabClick(event)">⛏️ Mining</div>
@@ -249,96 +277,189 @@
   </div>
 
   <script>
-    /* --- App state --- */
+    /* -------------------------
+       APP STATE
+    ------------------------- */
     let miningInterval = null;
     let unclaimed = 0;
     let balance = 0;
-    let lastTime = null;
-    let hash = 0;
 
-    // Utility: show page with animated direction
-    function showPage(targetId) {
-      const pages = document.querySelectorAll('.page');
-      const active = document.querySelector('.page.active');
-      if (active && active.id === targetId) return;
+    /* -------------------------
+       AUTH (register/login)
+    ------------------------- */
+    const loginBlock = document.getElementById('loginBlock');
+    const registerBlock = document.getElementById('registerBlock');
+    const btnShowLogin = document.getElementById('btnShowLogin');
+    const btnShowRegister = document.getElementById('btnShowRegister');
+    const refreshCaptcha = document.getElementById('refreshCaptcha');
 
-      // find direction for animation (index)
-      const tabs = ['homePage','miningPage','walletPage','profilePage'];
-      const fromIdx = active ? tabs.indexOf(active.id) : 0;
-      const toIdx = tabs.indexOf(targetId);
-      const direction = toIdx > fromIdx ? 'left' : 'right'; // entering from left if toIdx > fromIdx
+    btnShowLogin.addEventListener('click', ()=> {
+      loginBlock.style.display = '';
+      registerBlock.style.display = 'none';
+      btnShowLogin.classList.add('active');
+      btnShowRegister.classList.remove('active');
+    });
+    btnShowRegister.addEventListener('click', ()=> {
+      loginBlock.style.display = 'none';
+      registerBlock.style.display = '';
+      btnShowRegister.classList.add('active');
+      btnShowLogin.classList.remove('active');
+    });
 
-      if (active) {
-        active.classList.remove('active');
-        active.classList.add(direction === 'left' ? 'enter-left' : 'enter-right');
-        // remove temporary class after animation
-        setTimeout(()=> active.classList.remove('enter-left','enter-right'), 450);
+    function randomCaptcha(){
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let c = "";
+      for(let i=0;i<5;i++) c += chars.charAt(Math.floor(Math.random()*chars.length));
+      return c;
+    }
+    function setCaptcha(){
+      document.getElementById('captchaText').innerText = randomCaptcha();
+    }
+    refreshCaptcha.addEventListener('click', setCaptcha);
+    setCaptcha();
+
+    // Register handler (simple localStorage)
+    document.getElementById('btnRegister').addEventListener('click', ()=> {
+      const e = document.getElementById('regEmail').value.trim();
+      const u = document.getElementById('regUsername').value.trim();
+      const p = document.getElementById('regPassword').value;
+      if(!e || !u || !p) return alert('Lengkapi semua field pendaftaran!');
+      // store demo user in localStorage (key by username)
+      const userKey = 'user_' + u.toLowerCase();
+      if(localStorage.getItem(userKey)) return alert('Username sudah terdaftar!');
+      localStorage.setItem(userKey, JSON.stringify({email:e, username:u, password:p, balance:0}));
+      alert('Registrasi berhasil! Silakan login.');
+      // switch to login
+      btnShowLogin.click();
+      // fill login fields
+      document.getElementById('loginEmail').value = e;
+      document.getElementById('loginUsername').value = u;
+    });
+
+    // Login handler
+    document.getElementById('btnLogin').addEventListener('click', ()=> {
+      const e = document.getElementById('loginEmail').value.trim();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value;
+      const c = document.getElementById('captchaInput').value.trim();
+
+      if(!e || !u || !p) return alert('Lengkapi semua field login!');
+      if(c !== document.getElementById('captchaText').innerText) {
+        setCaptcha();
+        document.getElementById('captchaInput').value = '';
+        return alert('Captcha salah!');
       }
 
-      const next = document.getElementById(targetId);
-      next.classList.add('active');
+      // check local storage for user
+      const userKey = 'user_' + u.toLowerCase();
+      const stored = localStorage.getItem(userKey);
+      if(stored){
+        const data = JSON.parse(stored);
+        if(data.password !== p) return alert('Password salah!');
+        // login success, load user info
+        localStorage.setItem('auth_user', u.toLowerCase());
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('balance', data.balance || 0);
+        onAppStart();
+      } else {
+        // allow quick-create? or block
+        return alert('Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
+      }
+    });
 
-      // update tab highlights
-      document.querySelectorAll('.tab').forEach(t=>{
-        t.classList.toggle('active', t.dataset.page === targetId);
-      });
-    }
-
+    /* -------------------------
+       UI Navigation & Tabs
+    ------------------------- */
     function onTabClick(e){
       const page = e.currentTarget.dataset.page;
       showPage(page);
     }
 
-    // --- Captcha & Login (demo simplified) ---
-    function generateCaptcha(){
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let code = '';
-      for(let i=0;i<5;i++) code += chars.charAt(Math.floor(Math.random()*chars.length));
-      // place in a hidden input? here we'll reuse headerUser as placeholder for demo login screen omitted.
-      // For simplicity in this version we auto-validate without explicit captcha UI during login.
-      return code;
+    function showPage(targetId){
+      const pages = ['homePage','miningPage','walletPage','profilePage','authPage'];
+      const activeEl = document.querySelector('.page.active');
+      const fromIdx = activeEl ? pages.indexOf(activeEl.id) : 0;
+      const toIdx = pages.indexOf(targetId);
+      const direction = toIdx > fromIdx ? 'left' : 'right';
+
+      if(activeEl){
+        activeEl.classList.remove('active');
+        activeEl.classList.add(direction === 'left' ? 'enter-left' : 'enter-right');
+        setTimeout(()=> activeEl.classList.remove('enter-left','enter-right'), 420);
+      }
+      const next = document.getElementById(targetId);
+      next.classList.add('active');
+
+      // update tab highlighting
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === targetId));
     }
 
-    // Demo quick-login
-    function demoLogin(){
-      const user = prompt('Masukkan username demo','Aepuloh') || 'Guest';
-      const email = (user+'@example.com').toLowerCase();
-      localStorage.setItem('username', user);
-      localStorage.setItem('email', email);
-      localStorage.setItem('balance', '0');
-      onAppStart();
+    /* -------------------------
+       MINING LOGIC
+    ------------------------- */
+    const progressFill = document.getElementById('progressFill');
+    const unclaimedEl = document.getElementById('unclaimed');
+    const hashrateEl = document.getElementById('hashrate');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+
+    function spawnSpark(containerSelector){
+      const containers = document.querySelectorAll(containerSelector);
+      const container = containers[0] || containers[1];
+      if(!container) return;
+      const rect = container.getBoundingClientRect();
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      // random near center
+      const x = rect.width/2 + (Math.random()*120 - 60);
+      const y = rect.height/2 + (Math.random()*40 - 10);
+      spark.style.left = x + 'px';
+      spark.style.top = y + 'px';
+      spark.style.animationDuration = (900 + Math.random()*700) + 'ms';
+      container.appendChild(spark);
+      setTimeout(()=> spark.remove(), 1700);
     }
 
-    // Start mining: animate progress, create sparks, increment unclaimed
     function startMining(){
       if(miningInterval) return;
-      document.getElementById('startBtn') && (document.getElementById('startBtn').style.display='none');
-      document.getElementById('stopBtn') && (document.getElementById('stopBtn').style.display='inline-block');
+      // show hide buttons
+      startBtn && (startBtn.style.display='none');
+      stopBtn && (stopBtn.style.display='inline-block');
 
-      // animate core speed
-      document.getElementById('coreRing')?.classList.add('spinning');
+      miningInterval = setInterval(()=> {
+        // increase hashrate
+        const h = Math.floor(200 + Math.random()*1200);
+        hashrateEl.innerText = h + ' H/s';
 
-      lastTime = performance.now();
-      miningInterval = setInterval(()=>{
-        // increase hashrate randomly
-        hash = Math.floor(100 + Math.random()*900);
-        document.getElementById('hashrate').innerText = hash + ' H/s';
+        // progress
+        let current = parseFloat(progressFill.dataset.val || '0');
+        current = Math.min(100, current + (1 + Math.random()*2.2));
+        progressFill.style.width = current + '%';
+        progressFill.dataset.val = current;
 
-        // progress increments
-        const fill = document.getElementById('progressFill');
-        const current = parseFloat(fill.dataset.val || '0');
-        let next = Math.min(100, current + (0.6 + Math.random()*1.2)); // faster slightly random
-        fill.style.width = next + '%';
-        fill.dataset.val = next;
+        // unclaimed
+        unclaimed += 0.00001 + Math.random()*0.00006;
+        unclaimedEl.innerText = unclaimed.toFixed(6);
 
-        // add unclaimed based on fill
-        unclaimed += 0.00001 + Math.random()*0.00004;
-        document.getElementById('unclaimed').innerText = unclaimed.toFixed(6);
+        // visual sparks
+        spawnSpark('.miner-visual');
 
-        // spawn a spark near core:
-        spawnSpark();
-        // update home/wallet UI
+        // update UI numbers
         updateUI();
+        // when progress reaches 100, auto-move a small portion to wallet (simulate block)
+        if(current >= 100){
+          // small auto-claim to balance (simulate payout)
+          const payout = unclaimed * 0.5;
+          balance += payout;
+          unclaimed = unclaimed - payout;
+          progressFill.style.width = '0%';
+          progressFill.dataset.val = '0';
+          // save
+          localStorage.setItem('balance', balance.toFixed(6));
+          updateUI();
+          toast('Auto payout '+payout.toFixed(6)+' KOT');
+        }
       }, 700);
     }
 
@@ -346,49 +467,31 @@
       if(!miningInterval) return;
       clearInterval(miningInterval);
       miningInterval = null;
-      document.getElementById('startBtn') && (document.getElementById('startBtn').style.display='inline-block');
-      document.getElementById('stopBtn') && (document.getElementById('stopBtn').style.display='none');
-      document.getElementById('hashrate').innerText = '0 H/s';
+      startBtn && (startBtn.style.display='inline-block');
+      stopBtn && (stopBtn.style.display='none');
+      hashrateEl.innerText = '0 H/s';
     }
 
     function claim(){
+      if(unclaimed <= 0) return toast('Tidak ada yang bisa diklaim.');
       balance += unclaimed;
       unclaimed = 0;
-      // reset progress
-      const fill = document.getElementById('progressFill');
-      fill.style.width = '0%';
-      fill.dataset.val = '0';
+      progressFill.style.width = '0%';
+      progressFill.dataset.val = '0';
+      localStorage.setItem('balance', balance.toFixed(6));
       updateUI();
-      // small feedback
       toast('Claimed to wallet ✓');
     }
 
-    function spawnSpark(){
-      const container = document.querySelectorAll('.miner-visual')[0] || document.querySelectorAll('.machine-core')[0];
-      if(!container) return;
-      const spark = document.createElement('div');
-      spark.className = 'spark';
-      // random position near bottom-center of visual
-      const w = container.clientWidth, h = container.clientHeight;
-      const x = w/2 + (Math.random()*120 - 60);
-      const y = h/2 + (Math.random()*40 - 10);
-      spark.style.left = x + 'px';
-      spark.style.top = y + 'px';
-      // random duration
-      const dur = 900 + Math.random()*700;
-      spark.style.animationDuration = dur + 'ms';
-      container.appendChild(spark);
-      setTimeout(()=> {
-        spark.remove();
-      }, dur+50);
-    }
-
     function updateUI(){
-      document.getElementById('homeBalance').innerText = balance.toFixed(6) + ' KOT';
+      document.getElementById('homeBalance').innerText = (balance + unclaimed).toFixed(6) + ' KOT';
       document.getElementById('walletBalance').innerText = balance.toFixed(6);
       document.getElementById('unclaimed').innerText = unclaimed.toFixed(6);
     }
 
+    /* -------------------------
+       TOAST
+    ------------------------- */
     function toast(msg){
       const el = document.createElement('div');
       el.textContent = msg;
@@ -398,70 +501,115 @@
       el.style.transform = 'translateX(-50%)';
       el.style.padding = '10px 16px';
       el.style.borderRadius = '10px';
-      el.style.background = 'rgba(0,0,0,0.7)';
+      el.style.background = 'linear-gradient(90deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5))';
       el.style.color = 'white';
       el.style.zIndex = 9999;
-      el.style.fontSize = '14px';
+      el.style.fontSize = '13px';
       document.body.appendChild(el);
-      setTimeout(()=> el.style.opacity = '0', 2200);
-      setTimeout(()=> el.remove(), 2600);
+      setTimeout(()=> el.style.opacity = '0', 2000);
+      setTimeout(()=> el.remove(), 2400);
     }
 
-    function logout(){
-      localStorage.clear();
-      location.reload();
-    }
-
-    // initialize app if stored user exists
+    /* -------------------------
+       AUTH STATE & BOOT
+    ------------------------- */
     function onAppStart(){
-      const u = localStorage.getItem('username');
-      const e = localStorage.getItem('email');
+      const authUser = localStorage.getItem('auth_user');
+      const username = localStorage.getItem('username');
+      const email = localStorage.getItem('email');
       const b = parseFloat(localStorage.getItem('balance') || '0');
       balance = isNaN(b) ? 0 : b;
-      if(u && e){
-        document.getElementById('headerUser').innerText = u;
-        updateUI();
-        // show app (swap views)
-        document.querySelectorAll('.page').forEach(p=> p.classList.remove('active'));
+      if(authUser && username){
+        // hide auth page and show home
+        document.getElementById('authPage').classList.remove('active');
+        document.getElementById('authPage').style.pointerEvents = 'none';
         document.getElementById('homePage').classList.add('active');
-        document.querySelectorAll('.tab').forEach(t=> t.classList.remove('active'));
-        document.querySelector('.tab[data-page="homePage"]').classList.add('active');
+        // highlight tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === 'homePage'));
+        // fill profile/header
+        document.getElementById('profileEmail').innerText = email || '';
+        document.getElementById('profileName').innerText = username || '';
+        document.getElementById('headerUser').innerText = username || 'User';
+        // update UI numbers
+        updateUI();
       } else {
-        // no user - prompt quick demo login
-        setTimeout(()=> {
-          const login = confirm('Auto-demo login? Tekan OK untuk masuk (demo).');
-          if(login) demoLogin();
-        }, 400);
+        // keep auth visible
+        document.getElementById('authPage').classList.add('active');
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       }
     }
 
-    function demoLogin(){
-      const user = 'Aepuloh';
-      const email = 'airdropshunterid@gmail.com';
-      localStorage.setItem('username', user);
-      localStorage.setItem('email', email);
-      localStorage.setItem('balance', '0');
-      onAppStart();
-      document.getElementById('profileEmail').innerText = email;
-      document.getElementById('profileName').innerText = user;
+    function logout(){
+      // save balance to stored user if registered
+      const u = localStorage.getItem('auth_user');
+      if(u){
+        const key = 'user_' + u;
+        const stored = localStorage.getItem(key);
+        if(stored){
+          const dat = JSON.parse(stored);
+          dat.balance = balance.toFixed(6);
+          localStorage.setItem(key, JSON.stringify(dat));
+        }
+      }
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      // refresh to show auth
+      location.reload();
     }
 
-    // on load
+    /* quick demo: if no registered user exist, create demo account*/
+    function ensureDemo(){
+      const demoKey = 'user_aepuloh';
+      if(!localStorage.getItem(demoKey)){
+        localStorage.setItem(demoKey, JSON.stringify({email:'airdropshunterid@gmail.com', username:'Aepuloh', password:'demo123', balance:0}));
+      }
+    }
+
+    // quick demo login flow (buttonless)
+    function demoAutoLogin(){
+      // if user already logged in skip
+      if(localStorage.getItem('auth_user')) return;
+      // if a user exists in storage, do nothing; otherwise prompt demo
+      const hasAnyUser = Object.keys(localStorage).some(k=>k.startsWith('user_'));
+      if(!hasAnyUser){
+        ensureDemo();
+      }
+      // ask user to use demo
+      setTimeout(()=> {
+        if(confirm('Gunakan akun demo? Tekan OK untuk masuk (username: Aepuloh / pass: demo123)')) {
+          // login demo
+          localStorage.setItem('auth_user', 'aepuloh');
+          localStorage.setItem('username', 'Aepuloh');
+          localStorage.setItem('email', 'airdropshunterid@gmail.com');
+          localStorage.setItem('balance', '0');
+          onAppStart();
+        }
+      }, 400);
+    }
+
+    /* -------------------------
+       BOOT
+    ------------------------- */
     window.addEventListener('load', ()=> {
-      // default show home
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      document.getElementById('homePage').classList.add('active');
-      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-      document.querySelector('.tab[data-page="homePage"]').classList.add('active');
+      // init
+      setCaptcha();
+      ensureDemo();
+      onAppStart();
+      demoAutoLogin();
 
-      // fill profile if exists
-      const e = localStorage.getItem('email'), u = localStorage.getItem('username');
-      if(e) document.getElementById('profileEmail').innerText = e;
-      if(u) { document.getElementById('profileName').innerText = u; document.getElementById('headerUser').innerText = u; }
+      // bind tab clicks on initial load
+      document.querySelectorAll('.tab').forEach(t=>{
+        t.addEventListener('click', onTabClick);
+      });
 
-      updateUI();
-      // if no user, show quick demo prompt
-      if(!u) setTimeout(()=> demoLogin(), 600);
+      // keyboard: Enter to login when auth shown
+      document.getElementById('loginBlock').addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter') document.getElementById('btnLogin').click();
+      });
+      document.getElementById('registerBlock').addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter') document.getElementById('btnRegister').click();
+      });
     });
   </script>
 </body>
