@@ -3,52 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fire-Mining — Moonlight Edition</title>
+  <title>Fire-Mining — Firebase Moonlight</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{
-      --bg1:#070d1a;
-      --bg2:#0a1426;
-      --ml-blue:#7aa9ff;        /* moonlight blue */
-      --ml-cyan:#00eaff;
-      --ml-violet:#8b5cf6;
-      --glass: rgba(255,255,255,0.02);
-      --stroke: rgba(255,255,255,0.06);
+      --bg1:#070d1a; --bg2:#0a1426;
+      --ml-blue:#7aa9ff; --ml-cyan:#00eaff; --ml-violet:#8b5cf6;
+      --glass: rgba(255,255,255,0.02); --stroke: rgba(255,255,255,0.06);
     }
     html,body{height:100%}
     body{
-      margin:0;
+      margin:0; color:#e8f0ff; height:100vh; overflow:hidden;
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color:#e8f0ff;
-      height:100vh; overflow:hidden;
-      /* moonlight blue background */
       background:
-        radial-gradient(1000px 500px at 10% 10%, rgba(139,92,246,0.08), transparent 25%),
-        radial-gradient(900px 400px at 90% 90%, rgba(0,234,255,0.08), transparent 30%),
+        radial-gradient(1000px 500px at 10% 10%, rgba(139,92,246,.08), transparent 25%),
+        radial-gradient(900px 400px at 90% 90%, rgba(0,234,255,.08), transparent 30%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-    /* glass cards */
-    .glass{ background:var(--glass); border:1px solid var(--stroke); backdrop-filter: blur(10px); border-radius:14px; box-shadow: 0 10px 30px rgba(0,0,0,0.55); }
+    .glass{ background:var(--glass); border:1px solid var(--stroke); backdrop-filter: blur(10px); border-radius:14px; box-shadow: 0 10px 30px rgba(0,0,0,.55); }
     .app { display:flex; flex-direction:column; height:100%; }
-
-    /* pages */
     .page{ position:absolute; inset:18px; border-radius:14px; overflow:auto; opacity:0; transform:translateY(8px) scale(.995); transition:transform .35s, opacity .3s; pointer-events:none; display:flex; align-items:center; justify-content:center; }
     .page.active{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
-
-    /* bottom tabbar */
     .tabbar{ position:fixed; left:50%; transform:translateX(-50%); bottom:22px; width:calc(100% - 40px); max-width:980px; display:none; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(2,6,23,.45); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.55); z-index:999; }
     .tab{ padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .25s; color:rgba(255,255,255,.9);}
     .tab.active{ background:linear-gradient(90deg, rgba(0,234,255,.09), rgba(123,104,238,.09)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,.5); }
-
-    /* fields & buttons */
     .field{ width:100%; padding:.65rem .75rem; border-radius:10px; border:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.03); color:#eaf3ff; }
     .btn{ padding:.6rem .9rem; border-radius:10px; border:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.04); }
     .btn:hover{ filter:brightness(1.08); }
     .btn-start{ background:linear-gradient(90deg, rgba(0,234,255,.18), rgba(139,92,246,.18)); border-color:rgba(0,234,255,.28); }
     .btn-stop{ background:linear-gradient(90deg, rgba(255,0,82,.18), rgba(139,92,246,.18)); border-color:rgba(255,0,82,.28); }
-
-    /* mining visuals */
+    /* Mining visuals */
     .rig-wrap{ position:relative; margin:14px auto 10px; width:260px; height:160px; }
     .ring{ position:absolute; inset:0; margin:auto; width:120px; height:120px; border-radius:50%; border:6px solid var(--ml-violet); border-top:6px solid var(--ml-cyan); animation: spin 2s linear infinite; box-shadow:0 0 30px rgba(0,234,255,.3) inset; }
     .gear{ position:absolute; left:50%; top:50%; width:64px; height:64px; transform:translate(-50%,-50%); border:6px solid var(--ml-blue); border-left-color:transparent; border-radius:50%; animation: spinReverse 3.4s linear infinite; }
@@ -56,7 +41,6 @@
     @keyframes spin{ to{ transform:rotate(360deg);} }
     @keyframes spinReverse{ to{ transform:translate(-50%,-50%) rotate(-360deg);} }
     @keyframes scan{ 0%{ transform:translateY(0);} 100%{ transform:translateY(140px);} }
-
     .grid-bg{
       position:absolute; inset:0; pointer-events:none; opacity:.28; background:
         radial-gradient(circle at 50% 50%, rgba(0,234,255,.22), transparent 40%),
@@ -65,21 +49,16 @@
       mask: radial-gradient(220px 120px at 50% 50%, black 50%, transparent 80%);
       filter: drop-shadow(0 0 12px rgba(122,169,255,.35));
     }
-
     .progress{ height:10px; background:#0b203a; border:1px solid rgba(255,255,255,.06); border-radius:10px; overflow:hidden; }
     .progress > div{ height:100%; background:linear-gradient(90deg, var(--ml-cyan), var(--ml-violet)); width:0%; transition: width .4s ease; }
-
-    /* modal for ads */
+    /* Modal iklan */
     .modal{ position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:1000; }
     .modal.open{ display:flex; }
     .modal-card{ width:min(92vw,800px); height:420px; }
-
-    /* small helpers */
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
   </style>
 </head>
 <body>
-  <!-- animated starfield canvas -->
   <canvas id="stars" style="position:fixed; inset:0; z-index:-1;"></canvas>
 
   <div class="app">
@@ -100,7 +79,6 @@
             <button id="btnShowLogin" class="btn w-full">Login</button>
             <button id="btnShowRegister" class="btn w-full">Register</button>
           </div>
-
           <!-- LOGIN -->
           <div id="loginBlock">
             <input id="loginEmail" class="field" type="email" placeholder="Email" />
@@ -108,7 +86,6 @@
             <input id="loginPassword" class="field" type="password" placeholder="Kata sandi" />
             <button id="btnLogin" class="btn btn-start w-full mt-3">Login</button>
           </div>
-
           <!-- REGISTER -->
           <div id="registerBlock" style="display:none;">
             <input id="regEmail" class="field" type="email" placeholder="Email" />
@@ -124,21 +101,15 @@
         <div class="glass p-6 w-full max-w-xl text-center">
           <h3 class="text-lg font-semibold mb-2">Iklan</h3>
           <p class="text-sm opacity-70 mb-4">Klik ikon untuk memutar iklan.</p>
-
           <div class="flex items-center justify-center">
-            <button id="openAd" class="btn btn-start flex items-center gap-3">
-              ▶️ <span>Buka Iklan</span>
-            </button>
+            <button id="openAd" class="btn btn-start flex items-center gap-3">▶️ <span>Buka Iklan</span></button>
           </div>
-
-          <!-- Modal Iklan -->
           <div id="adModal" class="modal">
             <div class="modal-card glass p-2 relative">
               <button id="closeAd" class="btn btn-stop absolute right-3 top-3">✖</button>
               <iframe id="adFrame" src="" style="width:100%;height:100%;border:none;border-radius:12px;"></iframe>
             </div>
           </div>
-
           <p class="text-xs opacity-60 mt-4">Ringkasan saldo dipindah ke tab <b>Wallet</b>.</p>
         </div>
       </section>
@@ -147,23 +118,18 @@
       <section id="miningPage" class="page">
         <div class="glass p-6 w-full max-w-xl">
           <h3 class="text-lg font-semibold mb-2">Mining</h3>
-
-          <!-- Visual rig -->
           <div class="rig-wrap">
             <div class="grid-bg"></div>
             <div class="ring"></div>
             <div class="gear"></div>
             <div class="scanner"></div>
           </div>
-
           <div class="flex items-center justify-between text-sm mb-2">
             <div>Hashrate: <span class="mono" id="hashrate">150 H/s</span></div>
             <div>Sisa waktu: <span class="mono" id="eta">—</span></div>
           </div>
-
           <div class="progress mb-2"><div id="progressFill"></div></div>
           <p class="text-sm">Unclaimed: <span id="unclaimed">0.000000</span> KOT</p>
-
           <div class="mt-3 flex gap-2">
             <button id="startBtn" class="btn btn-start" onclick="startMining()">Start 24 Jam</button>
             <button id="claimBtn" class="btn hidden" onclick="claim()">Claim</button>
@@ -176,13 +142,11 @@
       <section id="walletPage" class="page">
         <div class="glass p-6 w-full max-w-xl">
           <h3 class="text-lg font-semibold mb-2">Wallet</h3>
-
           <div class="grid gap-3">
             <div class="glass p-3">
               <div class="text-sm opacity-80">Saldo</div>
               <div id="walletBalance" class="text-2xl mono">0.000000 KOT</div>
             </div>
-
             <div class="glass p-3">
               <h4 class="font-semibold mb-2">Deposit</h4>
               <div class="text-sm opacity-80 mb-1">USDT (BEP20)</div>
@@ -193,7 +157,7 @@
                 <button class="btn btn-start" onclick="copyAddr()">Salin Alamat</button>
                 <button class="btn" onclick="alert('Setelah transfer, tunggu verifikasi admin. (Demo)')">Saya sudah transfer</button>
               </div>
-              <p class="text-xs opacity-60 mt-2">Catatan: ini demo frontend. Untuk otomatisasi/top-up nyata, butuh backend.</p>
+              <p class="text-xs opacity-60 mt-2">Catatan: ini demo frontend. Top-up otomatis butuh backend / functions.</p>
             </div>
           </div>
         </div>
@@ -205,29 +169,24 @@
           <h3 class="text-lg font-semibold mb-3">Profile</h3>
           <div id="profileEmail" class="mb-1 text-sm opacity-90"></div>
           <div id="profileName" class="mb-4 text-sm opacity-90"></div>
-
           <h4 class="font-semibold mb-2">Histori Mining (harian)</h4>
           <div class="glass p-2 overflow-auto">
             <table class="w-full text-sm">
               <thead class="opacity-80">
-                <tr>
-                  <th class="text-left p-2">Tanggal</th>
-                  <th class="text-right p-2">Jumlah (KOT)</th>
-                </tr>
+                <tr><th class="text-left p-2">Tanggal</th><th class="text-right p-2">Jumlah (KOT)</th></tr>
               </thead>
               <tbody id="historyBody"></tbody>
             </table>
           </div>
-
           <button onclick="logout()" class="btn btn-stop w-full mt-4">Logout</button>
         </div>
       </section>
 
-      <!-- ADMIN (hanya user 'admin') -->
+      <!-- ADMIN -->
       <section id="adminPage" class="page">
         <div class="glass p-6 w-full max-w-3xl">
           <h3 class="text-lg font-semibold mb-3">Pantauan Admin</h3>
-          <p class="text-sm opacity-80 mb-3">Daftar user (localStorage demo):</p>
+          <p class="text-sm opacity-80 mb-3">Daftar user (Realtime Database):</p>
           <div class="glass p-2 overflow-auto">
             <table class="w-full text-sm">
               <thead class="opacity-80">
@@ -235,7 +194,7 @@
                   <th class="text-left p-2">Username</th>
                   <th class="text-left p-2">Email</th>
                   <th class="text-right p-2">Saldo (KOT)</th>
-                  <th class="text-left p-2">Status Mining</th>
+                  <th class="text-left p-2">Status</th>
                   <th class="text-left p-2">Mulai</th>
                   <th class="text-right p-2">Total Claim</th>
                 </tr>
@@ -243,7 +202,7 @@
               <tbody id="adminBody"></tbody>
             </table>
           </div>
-          <p class="text-xs opacity-60 mt-2">Catatan: ini hanya menampilkan data di browser ini (tanpa server).</p>
+          <p class="text-xs opacity-60 mt-2">Untuk role admin sesungguhnya, atur rules/claims. Ini demo: admin = user dengan username "admin".</p>
         </div>
       </section>
     </main>
@@ -258,104 +217,48 @@
     </nav>
   </div>
 
-  <script>
-    /* =========================
-       Utilities & Storage
-    ==========================*/
-    const DUR = 24*60*60*1000;      // 24 jam
-    const REWARD_PER_24H = 1;       // 1 KOT / 24 jam (bisa ubah)
-    const HASHRATE = 150;           // 150 H/s (tampilan)
-    const AD_URL = "https://iklan-giga-hub.vercel.app/"; // ganti jika perlu
+  <!-- Firebase v9 modular -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getDatabase, ref, set, update, get, child, onValue
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+    // ======== GANTI DENGAN CONFIG PROJECT ANDA ========
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "YOUR_APP_ID"
+    };
+    // ==================================================
+
+    // Init
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    // ======== Konstanta App ========
+    const DUR = 24*60*60*1000;     // 24 jam
+    const REWARD_PER_24H = 1;      // 1 KOT / 24 jam
+    const HASHRATE = 150;          // 150 H/s
+    const AD_URL = "https://iklan-giga-hub.vercel.app/";
+
+    // ======== Helpers ========
     const $ = sel => document.querySelector(sel);
-
-    function userKey(u){ return 'user_'+u.toLowerCase(); }
-    function getAuth(){ return localStorage.getItem('auth_user') || ''; }
-
-    function getUserData(){
-      const u = getAuth();
-      if(!u) return null;
-      const raw = localStorage.getItem(userKey(u));
-      if(!raw){
-        // fallback dari versi lama
-        return {
-          email: localStorage.getItem('email')||'',
-          username: localStorage.getItem('username')||u,
-          password: '', balance: parseFloat(localStorage.getItem('balance')||'0'),
-          miningActive:false, miningStartTime:0, unclaimed:0, history:[]
-        };
-      }
-      const obj = JSON.parse(raw);
-      // field default
-      obj.balance = parseFloat(obj.balance||0);
-      obj.miningActive = !!obj.miningActive;
-      obj.miningStartTime = parseInt(obj.miningStartTime||0);
-      obj.unclaimed = parseFloat(obj.unclaimed||0);
-      obj.history = Array.isArray(obj.history)?obj.history:[];
-      obj.totalClaim = parseFloat(obj.totalClaim||0);
-      return obj;
-    }
-    function setUserData(obj){
-      const u = getAuth();
-      if(!u) return;
-      localStorage.setItem(userKey(u), JSON.stringify(obj));
-      // sinkron tampilan header balance dll
-      updateUI(obj);
-    }
+    const authKey = 'auth_user';
+    function getAuth(){ return localStorage.getItem(authKey) || ''; }
+    function setAuth(u){ localStorage.setItem(authKey, u); }
+    function clearAuth(){ localStorage.removeItem(authKey); }
 
     function formatKOT(n){ return (n||0).toFixed(6); }
-    function formatDate(ts){
-      const d = new Date(ts);
-      const pad=n=>String(n).padStart(2,'0');
-      return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-    }
+    function formatDate(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+    function msToHuman(ms){ const s=Math.ceil(ms/1000); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60; const p=n=>String(n).padStart(2,'0'); return `${p(h)}:${p(m)}:${p(ss)}`; }
 
-    /* =========================
-       Auth
-    ==========================*/
-    $('#btnRegister').addEventListener('click', ()=>{
-      const e=$('#regEmail').value.trim();
-      const u=$('#regUsername').value.trim();
-      const p=$('#regPassword').value;
-      if(!e||!u||!p) return alert('Lengkapi semua field!');
-      if(localStorage.getItem(userKey(u))) return alert('Username sudah terdaftar!');
-      const data={email:e, username:u, password:p, balance:0, miningActive:false, miningStartTime:0, unclaimed:0, history:[], totalClaim:0};
-      localStorage.setItem(userKey(u), JSON.stringify(data));
-      alert('Registrasi berhasil! Silakan login.');
-      $('#btnShowLogin').click();
-    });
-
-    $('#btnLogin').addEventListener('click', ()=>{
-      const e=$('#loginEmail').value.trim();
-      const u=$('#loginUsername').value.trim();
-      const p=$('#loginPassword').value;
-      if(!e||!u||!p) return alert('Lengkapi semua field!');
-      const raw=localStorage.getItem(userKey(u));
-      if(!raw) return alert('Akun tidak ditemukan, silakan daftar!');
-      const data=JSON.parse(raw);
-      if(data.password!==p) return alert('Password salah!');
-      localStorage.setItem('auth_user', u.toLowerCase());
-      onAppStart();
-    });
-
-    $('#btnShowLogin').addEventListener('click',()=>{
-      $('#loginBlock').style.display='';
-      $('#registerBlock').style.display='none';
-    });
-    $('#btnShowRegister').addEventListener('click',()=>{
-      $('#loginBlock').style.display='none';
-      $('#registerBlock').style.display='';
-    });
-
-    function logout(){
-      localStorage.removeItem('auth_user');
-      location.reload();
-    }
-
-    /* =========================
-       Pages / Tabs
-    ==========================*/
-    function onTabClick(e){ showPage(e.currentTarget.dataset.page); }
+    // ======== UI Nav ========
+    window.onTabClick = (e)=>showPage(e.currentTarget.dataset.page);
     function showPage(id){
       document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -365,76 +268,113 @@
       if(id==='adminPage') renderAdmin();
     }
 
-    /* =========================
-       Ads Modal (no autoplay on home)
-    ==========================*/
-    $('#openAd').addEventListener('click', ()=>{
-      $('#adFrame').src = AD_URL;
-      $('#adModal').classList.add('open');
-    });
-    $('#closeAd').addEventListener('click', ()=>{
-      $('#adModal').classList.remove('open');
-      $('#adFrame').src = '';
+    // ======== Ads Modal ========
+    $('#openAd').addEventListener('click', ()=>{ $('#adFrame').src = AD_URL; $('#adModal').classList.add('open'); });
+    $('#closeAd').addEventListener('click', ()=>{ $('#adModal').classList.remove('open'); $('#adFrame').src=''; });
+
+    // ======== Auth (pakai Firebase DB sederhana) ========
+    $('#btnRegister').addEventListener('click', async ()=>{
+      const email=$('#regEmail').value.trim();
+      const username=$('#regUsername').value.trim();
+      const password=$('#regPassword').value;
+      if(!email||!username||!password) return alert('Lengkapi semua field!');
+      const userRef = ref(db, 'users/'+username);
+      const snap = await get(userRef);
+      if(snap.exists()) return alert('Username sudah terdaftar!');
+      await set(userRef, {
+        email, username, password, balance:0, miningActive:false,
+        miningStartTime:0, history:[], totalClaim:0
+      });
+      alert('Registrasi berhasil! Silakan login.');
+      $('#btnShowLogin').click();
     });
 
-    /* =========================
-       Mining core (background-sim)
-    ==========================*/
-    function startMining(){
-      const user = getUserData(); if(!user) return;
-      if(user.miningActive) return;
-      // jika baru claim, boleh start lagi; jika belum 24h selesai, tetap tidak bisa claim
-      user.miningActive = true;
-      user.miningStartTime = Date.now();
-      setUserData(user);
+    $('#btnLogin').addEventListener('click', async ()=>{
+      const email=$('#loginEmail').value.trim();
+      const username=$('#loginUsername').value.trim();
+      const password=$('#loginPassword').value;
+      if(!email||!username||!password) return alert('Lengkapi semua field!');
+      const snap = await get(ref(db,'users/'+username));
+      if(!snap.exists()) return alert('Akun tidak ditemukan!');
+      const user = snap.val();
+      if(user.password !== password) return alert('Password salah!');
+      setAuth(username);
+      onAppStart();
+    });
+
+    $('#btnShowLogin').addEventListener('click',()=>{ $('#loginBlock').style.display=''; $('#registerBlock').style.display='none'; });
+    $('#btnShowRegister').addEventListener('click',()=>{ $('#loginBlock').style.display='none'; $('#registerBlock').style.display=''; });
+
+    window.logout = function(){ clearAuth(); location.reload(); };
+
+    // ======== Data Current User (listener realtime) ========
+    let currentUser = null;     // object user
+    let unsubUser    = null;    // off listener
+    function listenUser(username){
+      if(unsubUser) unsubUser(); // detach lama
+      const r = ref(db,'users/'+username);
+      const cb = onValue(r, (snap)=>{
+        if(snap.exists()){
+          currentUser = snap.val();
+          updateUI();
+          // auto refresh mining UI
+          if(document.getElementById('miningPage').classList.contains('active')) {
+            if(!rafId) tickProgress();
+          }
+        }
+      });
+      // simpan fungsi untuk stop (onValue return unsubscribe)
+      unsubUser = cb;
+    }
+
+    // ======== Mining Core ========
+    window.startMining = async function(){
+      if(!currentUser) return;
+      if(currentUser.miningActive) return;
+      await update(ref(db,'users/'+currentUser.username), {
+        miningActive:true, miningStartTime: Date.now()
+      });
       $('#startBtn').classList.add('hidden');
       $('#claimBtn').classList.add('hidden');
       $('#miningNote').innerText = '⛏️ Mining berjalan...';
-      tickProgress(); // refresh tampilan segera
-    }
+      tickProgress();
+    };
 
-    function timeLeft(user){
-      if(!user.miningActive) return DUR;
-      const elapsed = Date.now() - (user.miningStartTime||0);
+    function timeLeft(){
+      if(!currentUser || !currentUser.miningActive) return DUR;
+      const elapsed = Date.now() - (currentUser.miningStartTime||0);
       return Math.max(0, DUR - elapsed);
     }
-
-    function calcUnclaimed(user){
-      // linear reward; 1 KOT / 24h
-      const elapsed = Math.min(DUR, Math.max(0, Date.now() - (user.miningStartTime||0)));
-      const earned = (elapsed / DUR) * REWARD_PER_24H;
-      return user.miningActive ? earned : 0;
+    function calcUnclaimed(){
+      if(!currentUser || !currentUser.miningActive) return 0;
+      const elapsed = Math.min(DUR, Math.max(0, Date.now() - (currentUser.miningStartTime||0)));
+      return (elapsed / DUR) * REWARD_PER_24H;
     }
 
     let rafId=null;
     function tickProgress(){
-      const user = getUserData(); if(!user) return;
-      const left = timeLeft(user);
+      if(!currentUser){ if(rafId) cancelAnimationFrame(rafId), rafId=null; return; }
+      const left = timeLeft();
       const elapsed = DUR - left;
       const pct = (elapsed / DUR) * 100;
-      const earned = calcUnclaimed(user);
-
+      const earned = calcUnclaimed();
       // UI
       $('#hashrate').innerText = HASHRATE + ' H/s';
       $('#eta').innerText = left>0 ? msToHuman(left) : 'Selesai';
-      $('#progressFill').style.width = pct.toFixed(2) + '%';
+      $('#progressFill').style.width = pct.toFixed(2)+'%';
       $('#unclaimed').innerText = formatKOT(earned);
-
-      if(user.miningActive){
+      if(currentUser.miningActive){
         if(left<=0){
-          // selesai -> siap klaim
           $('#startBtn').classList.add('hidden');
           $('#claimBtn').classList.remove('hidden');
           $('#miningNote').innerText = '✅ Mining selesai, silakan Claim.';
-          // stop loop; progress penuh
-          if(rafId) cancelAnimationFrame(rafId), rafId=null;
-          return;
-        }else{
+          if(rafId) cancelAnimationFrame(rafId), rafId=null; return;
+        } else {
           $('#startBtn').classList.add('hidden');
           $('#claimBtn').classList.add('hidden');
           $('#miningNote').innerText = '⛏️ Mining berjalan...';
         }
-      }else{
+      } else {
         $('#startBtn').classList.remove('hidden');
         $('#claimBtn').classList.add('hidden');
         $('#miningNote').innerText = 'Klik Start untuk memulai mining 24 jam. Tidak bisa di-stop.';
@@ -443,10 +383,9 @@
     }
 
     function checkMiningStatus(){
-      const user = getUserData(); if(!user) return;
-      // tampilkan tombol sesuai status
-      const left = timeLeft(user);
-      if(user.miningActive){
+      if(!currentUser) return;
+      const left = timeLeft();
+      if(currentUser.miningActive){
         if(left<=0){ $('#startBtn').classList.add('hidden'); $('#claimBtn').classList.remove('hidden'); }
         else{ $('#startBtn').classList.add('hidden'); $('#claimBtn').classList.add('hidden'); }
       }else{
@@ -455,76 +394,53 @@
       if(!rafId) tickProgress();
     }
 
-    function claim(){
-      const user = getUserData(); if(!user) return;
-      if(!user.miningActive) return;
-      const left = timeLeft(user);
-      if(left>0) return; // belum selesai
-      const reward = REWARD_PER_24H; // full
-      user.balance = (user.balance||0) + reward;
-      user.totalClaim = (user.totalClaim||0) + reward;
-      // history by day
-      user.history = user.history || [];
-      user.history.unshift({ ts: Date.now(), amount: reward });
-      // reset status
-      user.miningActive = false;
-      user.miningStartTime = 0;
-      setUserData(user);
-
-      // UI
-      $('#walletBalance').innerText = formatKOT(user.balance)+' KOT';
-      $('#unclaimed').innerText = '0.000000';
-      $('#startBtn').classList.remove('hidden');
-      $('#claimBtn').classList.add('hidden');
-      $('#miningNote').innerText = 'Claim berhasil! Anda bisa Start lagi.';
-      renderHistory();
+    window.claim = async function(){
+      if(!currentUser || !currentUser.miningActive) return;
+      const left = timeLeft();
+      if(left>0) return;
+      const reward = REWARD_PER_24H;
+      const newBal = (currentUser.balance||0) + reward;
+      const newHist = [{ ts: Date.now(), amount: reward }, ...(currentUser.history||[])];
+      const newTotal = (currentUser.totalClaim||0) + reward;
+      await update(ref(db,'users/'+currentUser.username), {
+        balance:newBal, history:newHist, totalClaim:newTotal, miningActive:false, miningStartTime:0
+      });
       alert('Claim berhasil!');
-    }
+    };
 
-    function updateUI(user){
-      if(!user) user = getUserData();
-      if(!user) return;
-      // header, wallet
-      $('#headerUser').innerText = user.username || 'Guest';
-      $('#walletBalance').innerText = formatKOT(user.balance)+' KOT';
-      // profile info
-      $('#profileEmail').innerText = 'Email: ' + (user.email||'-');
-      $('#profileName').innerText  = 'Username: ' + (user.username||'-');
+    // ======== UI (Wallet/Profile/Admin) ========
+    function updateUI(){
+      if(!currentUser) return;
+      $('#headerUser').innerText = currentUser.username || 'Guest';
+      $('#walletBalance').innerText = formatKOT(currentUser.balance||0)+' KOT';
+      $('#profileEmail').innerText = 'Email: ' + (currentUser.email||'-');
+      $('#profileName').innerText  = 'Username: ' + (currentUser.username||'-');
+      // admin tab
+      if((currentUser.username||'').toLowerCase()==='admin') $('#adminTab').classList.remove('hidden');
+      else $('#adminTab').classList.add('hidden');
     }
 
     function renderHistory(){
-      const user = getUserData(); if(!user) return;
-      const body = $('#historyBody'); body.innerHTML = '';
-      (user.history||[]).forEach(item=>{
+      if(!currentUser) return;
+      const body = $('#historyBody'); body.innerHTML='';
+      (currentUser.history||[]).forEach(item=>{
         const tr=document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2">${formatDate(item.ts)}</td>
-          <td class="p-2 text-right mono">${formatKOT(item.amount)}</td>
-        `;
+        tr.innerHTML = `<td class="p-2">${formatDate(item.ts)}</td><td class="p-2 text-right mono">${formatKOT(item.amount)}</td>`;
         body.appendChild(tr);
       });
     }
 
-    /* =========================
-       Wallet helpers
-    ==========================*/
-    function copyAddr(){
-      const txt = $('#depAddr').innerText.trim();
-      navigator.clipboard.writeText(txt).then(()=>alert('Alamat disalin.'));
-    }
-
-    /* =========================
-       Admin Page
-    ==========================*/
-    function renderAdmin(){
-      const body = $('#adminBody'); if(!body) return;
-      body.innerHTML='';
-      Object.keys(localStorage).filter(k=>k.startsWith('user_')).forEach(k=>{
-        try{
-          const u = JSON.parse(localStorage.getItem(k) || '{}');
-          const tr=document.createElement('tr');
+    async function renderAdmin(){
+      const tbody = $('#adminBody'); if(!tbody) return;
+      tbody.innerHTML='';
+      onValue(ref(db,'users'), (snap)=>{
+        tbody.innerHTML='';
+        const all = snap.val()||{};
+        Object.keys(all).forEach(username=>{
+          const u = all[username];
           const status = u.miningActive ? 'Active' : 'Idle';
           const start = u.miningStartTime ? new Date(u.miningStartTime).toLocaleString() : '-';
+          const tr=document.createElement('tr');
           tr.innerHTML = `
             <td class="p-2">${u.username||'-'}</td>
             <td class="p-2">${u.email||'-'}</td>
@@ -533,82 +449,49 @@
             <td class="p-2">${start}</td>
             <td class="p-2 text-right mono">${formatKOT(u.totalClaim||0)}</td>
           `;
-          body.appendChild(tr);
-        }catch(e){}
+          tbody.appendChild(tr);
+        });
       });
     }
 
-    /* =========================
-       Pretty time
-    ==========================*/
-    function msToHuman(ms){
-      const s = Math.ceil(ms/1000);
-      const h = Math.floor(s/3600);
-      const m = Math.floor((s%3600)/60);
-      const ss = s%60;
-      const pad=n=>String(n).padStart(2,'0');
-      return `${pad(h)}:${pad(m)}:${pad(ss)}`;
-    }
+    // ======== Wallet helpers ========
+    window.copyAddr = function(){
+      const txt = $('#depAddr').innerText.trim();
+      navigator.clipboard.writeText(txt).then(()=>alert('Alamat disalin.'));
+    };
 
-    /* =========================
-       Starfield background
-    ==========================*/
+    // ======== Starfield background ========
     (function stars(){
-      const c = document.getElementById('stars');
-      const ctx = c.getContext('2d');
+      const c = document.getElementById('stars'); const ctx = c.getContext('2d');
       function resize(){ c.width=innerWidth; c.height=innerHeight; }
       window.addEventListener('resize', resize); resize();
-      const N=100; const stars=[];
-      for(let i=0;i<N;i++){
-        stars.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*1.6+0.2, v:(Math.random()*0.4+0.2)});
-      }
-      function loop(){
+      const N=100; const arr=[];
+      for(let i=0;i<N;i++){ arr.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*1.6+0.2, v:(Math.random()*0.4+0.2)}); }
+      (function loop(){
         ctx.clearRect(0,0,c.width,c.height);
-        for(const s of stars){
-          ctx.beginPath();
-          ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-          ctx.fillStyle=`rgba(122,169,255,${0.35+Math.random()*0.4})`;
-          ctx.fill();
-          s.y += s.v;
-          if(s.y>c.height){ s.y=0; s.x=Math.random()*c.width; }
+        for(const s of arr){
+          ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+          ctx.fillStyle=`rgba(122,169,255,${0.35+Math.random()*0.4})`; ctx.fill();
+          s.y+=s.v; if(s.y>c.height){ s.y=0; s.x=Math.random()*c.width; }
         }
         requestAnimationFrame(loop);
-      }
-      loop();
+      })();
     })();
 
-    /* =========================
-       App bootstrap
-    ==========================*/
+    // ======== Bootstrap App ========
     function onAppStart(){
-      const auth = getAuth();
-      const adminTab = document.getElementById('adminTab');
-      if(auth){
-        const user = getUserData();
-        document.getElementById('authPage').classList.remove('active');
-        document.getElementById('homePage').classList.add('active');
+      const u = getAuth();
+      if(u){
+        $('#authPage').classList.remove('active');
+        $('#homePage').classList.add('active');
         document.getElementById('tabbar').style.display='flex';
-        updateUI(user);
-        // admin tab if username == admin
-        if((user.username||'').toLowerCase()==='admin') adminTab.classList.remove('hidden');
-        else adminTab.classList.add('hidden');
-        // start progress loop
-        checkMiningStatus();
-        renderHistory();
+        listenUser(u);
       }else{
-        document.getElementById('authPage').classList.add('active');
+        $('#authPage').classList.add('active');
         document.getElementById('tabbar').style.display='none';
       }
     }
-
     window.addEventListener('load', onAppStart);
-
-    // expose needed funcs
-    window.onTabClick = onTabClick;
-    window.startMining = startMining;
-    window.claim = claim;
-    window.copyAddr = copyAddr;
-    window.logout = logout;
   </script>
 </body>
 </html>
