@@ -89,9 +89,10 @@
   <div id="app" class="hidden flex-1 flex flex-col">
     <!-- Pages -->
     <div id="pages" class="flex-1 overflow-y-auto p-4 pb-20">
+
       <!-- Home -->
       <div id="homePage" class="hidden fade-in">
-        <div class="glass rounded-2xl p-6 text-center">
+        <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto mt-6 mb-24">
           <h1 class="text-2xl font-bold glow mb-2">Welcome, <span id="userDisplay"></span>!</h1>
           <p class="text-gray-300">Selamat datang di aplikasi mining crypto 🚀</p>
         </div>
@@ -99,11 +100,11 @@
 
       <!-- Mining -->
       <div id="miningPage" class="hidden fade-in">
-        <div class="glass rounded-2xl p-6 text-center mb-4">
+        <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto mt-6 mb-4">
           <h2 class="text-xl font-bold glow mb-2 flex items-center justify-center gap-2">
             <i class="lucide-activity"></i> Mining Dashboard
           </h2>
-          <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+          <div class="grid grid-cols-2 gap-3">
             <div class="glass rounded-xl p-3">
               <div class="text-sm text-gray-300">Hashrate</div>
               <div class="text-2xl font-mono"><span id="hashrate">0</span> H/s</div>
@@ -128,12 +129,12 @@
             </button>
           </div>
         </div>
-        <div class="glass rounded-2xl p-4 h-48 overflow-y-auto text-sm text-left" id="logs"></div>
+        <div class="glass rounded-2xl p-4 h-48 overflow-y-auto text-sm text-left max-w-sm mx-auto mb-24" id="logs"></div>
       </div>
 
       <!-- Wallet -->
       <div id="walletPage" class="hidden fade-in">
-        <div class="glass rounded-2xl p-6 text-center">
+        <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto mt-6 mb-24">
           <h2 class="text-xl font-bold glow mb-2 flex items-center justify-center gap-2">
             <i class="lucide-piggy-bank"></i> Wallet Balance
           </h2>
@@ -142,29 +143,30 @@
       </div>
 
       <!-- Profile -->
-<div id="profilePage" class="hidden fade-in">
-  <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto">
-    <h2 class="text-xl font-bold glow mb-4 flex items-center justify-center gap-2">
-      <i class="lucide-user-round"></i> Profile
-    </h2>
-    <div class="grid gap-2 text-left">
-      <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
-        <span class="text-gray-300 flex items-center gap-2"><i class="lucide-mail"></i>Email</span>
-        <span id="profileEmail" class="font-mono"></span>
-      </div>
-      <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
-        <span class="text-gray-300 flex items-center gap-2"><i class="lucide-user"></i>Username</span>
-        <span id="profileName" class="font-mono"></span>
+      <div id="profilePage" class="hidden fade-in">
+        <div class="glass rounded-2xl p-6 text-center max-w-sm mx-auto mt-6 mb-24">
+          <h2 class="text-xl font-bold glow mb-4 flex items-center justify-center gap-2">
+            <i class="lucide-user-round"></i> Profile
+          </h2>
+          <div class="grid gap-2 text-left">
+            <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
+              <span class="text-gray-300 flex items-center gap-2"><i class="lucide-mail"></i>Email</span>
+              <span id="profileEmail" class="font-mono"></span>
+            </div>
+            <div class="flex items-center justify-between glass rounded-xl px-4 py-3">
+              <span class="text-gray-300 flex items-center gap-2"><i class="lucide-user"></i>Username</span>
+              <span id="profileName" class="font-mono"></span>
+            </div>
+          </div>
+          <button onclick="logout()" class="mt-5 bg-red-500 hover:bg-red-400 px-4 py-2 rounded-xl flex items-center gap-2 mx-auto">
+            <i class="lucide-log-out"></i> Logout
+          </button>
+        </div>
       </div>
     </div>
-    <button onclick="logout()" class="mt-5 bg-red-500 hover:bg-red-400 px-4 py-2 rounded-xl flex items-center gap-2 mx-auto">
-      <i class="lucide-log-out"></i> Logout
-    </button>
-  </div>
-</div>
 
     <!-- Tab Bar -->
-    <div id="tabBar" class="glass flex justify-around items-center p-3 fixed bottom-0 w-full hidden">
+    <div id="tabBar" class="glass flex justify-around items-center p-3 fixed bottom-0 w-full z-50 hidden">
       <button onclick="showPage('homePage')" class="flex flex-col items-center">
         <i class="lucide-home"></i><div>Home</div>
       </button>
@@ -209,7 +211,6 @@
         return alert("Captcha salah, coba lagi!");
       }
 
-      // Simpan data non-sensitif
       localStorage.setItem("email", email);
       localStorage.setItem("username", username);
 
@@ -238,9 +239,9 @@
       document.getElementById("startBtn").classList.add("hidden");
       document.getElementById("stopBtn").classList.remove("hidden");
       miningInterval = setInterval(() => {
-        const hashrate = 150; // tetap 150 H/s
+        const hashrate = 150;
         document.getElementById("hashrate").innerText = hashrate;
-        const reward = (Math.random() * 0.0001).toFixed(4); // simulasi reward
+        const reward = (Math.random() * 0.0001).toFixed(4);
         unclaimed += parseFloat(reward);
         document.getElementById("unclaimed").innerText = unclaimed.toFixed(4);
         logCount++;
@@ -267,7 +268,6 @@
       document.getElementById("logs").prepend(log);
     }
 
-    // Auto load user jika sudah login
     window.onload = () => {
       generateCaptcha();
       const email = localStorage.getItem("email");
