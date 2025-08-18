@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fire-Mining — Full App</title>
+  <title>Fire-Mining — Final</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{
@@ -101,8 +101,24 @@
     /* mini cards */
     .mini-card { width:280px; max-width:80%; padding:12px; border-radius:12px; text-align:center; }
 
-    /* tabbar */
-    .tabbar { display:flex; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(0,0,0,0.32); border-top:1px solid rgba(255,255,255,0.02); }
+    /* tabbar (dinaikkan sedikit) */
+    .tabbar {
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:22px; /* dinaikkan dari 0 => 22px */
+      width:calc(100% - 40px);
+      max-width:980px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+      background:rgba(0,0,0,0.32);
+      border-radius:14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      z-index:999;
+    }
     .tab { padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .28s ease; color:rgba(255,255,255,0.88); }
     .tab.active { background:linear-gradient(90deg, rgba(0,242,255,0.06), rgba(139,92,246,0.04)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
 
@@ -118,6 +134,7 @@
       .miner-card{ flex-direction:column; gap:18px; align-items:center; padding:18px; }
       .progress-wrap{ width:100%; max-width:100%; }
       .miner-visual{ width:100%; height:200px; }
+      .tabbar { width:calc(100% - 28px); bottom:14px; }
     }
   </style>
 </head>
@@ -138,7 +155,7 @@
     <!-- PAGES -->
     <main class="pages">
 
-      <!-- AUTH SCREEN (LOGIN/REGISTER) -->
+      <!-- AUTH SCREEN (LOGIN/REGISTER/FORGOT) -->
       <section id="authPage" class="page active" style="position:relative;display:flex;align-items:center;justify-content:center;">
         <div class="glass auth-wrap p-6">
           <h2 class="text-lg font-semibold mb-3 text-center">Masuk atau Daftar</h2>
@@ -147,6 +164,7 @@
           <div class="flex gap-3 mb-4">
             <button id="btnShowLogin" class="btn w-full">Login</button>
             <button id="btnShowRegister" class="btn w-full">Register</button>
+            <button id="btnShowForgot" class="btn w-full">Lupa Password</button>
           </div>
 
           <!-- LOGIN -->
@@ -172,6 +190,13 @@
             <button id="btnRegister" class="btn w-full mt-2">Daftar</button>
             <p class="text-xs opacity-70 mt-2">Data demo disimpan di browser (localStorage).</p>
           </div>
+
+          <!-- FORGOT PASSWORD -->
+          <div id="forgotBlock" style="display:none;">
+            <input id="forgotEmail" class="field" type="email" placeholder="Masukkan email untuk reset" />
+            <button id="btnForgot" class="btn w-full mt-2">Kirim Link Reset (simulasi)</button>
+            <p class="text-xs opacity-70 mt-2">Jika email terdaftar, simulasi akan mengirim link reset.</p>
+          </div>
         </div>
       </section>
 
@@ -183,7 +208,7 @@
             <p class="text-sm opacity-80 mb-4">Ringkasan mining & akses cepat</p>
 
             <div class="mini-card glass mx-auto">
-              <div class="text-sm opacity-80">Saldo</div>
+              <div class="text-sm opacity-80">Saldo (wallet + unclaimed)</div>
               <div id="homeBalance" class="text-2xl font-mono mt-1">0.000000 KOT</div>
             </div>
 
@@ -209,7 +234,7 @@
             <div class="strip"></div>
             <div class="core-glow"></div>
             <div class="core-ring" id="coreRing"></div>
-            <!-- sparks by JS -->
+            <!-- hashrate display fixed -->
             <div style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); color:#dffaff; font-family:monospace; font-size:13px;">
               <div id="hashrate">0 H/s</div>
               <div style="font-size:11px; opacity:0.75;">Realtime Hashrate</div>
@@ -267,8 +292,8 @@
 
     </main>
 
-    <!-- TABBAR -->
-    <nav class="tabbar">
+    <!-- TABBAR (dinaikkan sedikit dari bottom) -->
+    <nav class="tabbar" role="navigation" aria-label="Main Tabs">
       <div class="tab active" data-page="homePage" onclick="onTabClick(event)">🏠 Home</div>
       <div class="tab" data-page="miningPage" onclick="onTabClick(event)">⛏️ Mining</div>
       <div class="tab" data-page="walletPage" onclick="onTabClick(event)">💰 Wallet</div>
@@ -285,25 +310,39 @@
     let balance = 0;
 
     /* -------------------------
-       AUTH (register/login)
+       AUTH (register/login/forgot)
     ------------------------- */
     const loginBlock = document.getElementById('loginBlock');
     const registerBlock = document.getElementById('registerBlock');
+    const forgotBlock = document.getElementById('forgotBlock');
     const btnShowLogin = document.getElementById('btnShowLogin');
     const btnShowRegister = document.getElementById('btnShowRegister');
+    const btnShowForgot = document.getElementById('btnShowForgot');
     const refreshCaptcha = document.getElementById('refreshCaptcha');
 
     btnShowLogin.addEventListener('click', ()=> {
       loginBlock.style.display = '';
       registerBlock.style.display = 'none';
+      forgotBlock.style.display = 'none';
       btnShowLogin.classList.add('active');
       btnShowRegister.classList.remove('active');
+      btnShowForgot.classList.remove('active');
     });
     btnShowRegister.addEventListener('click', ()=> {
       loginBlock.style.display = 'none';
       registerBlock.style.display = '';
+      forgotBlock.style.display = 'none';
       btnShowRegister.classList.add('active');
       btnShowLogin.classList.remove('active');
+      btnShowForgot.classList.remove('active');
+    });
+    btnShowForgot.addEventListener('click', ()=> {
+      loginBlock.style.display = 'none';
+      registerBlock.style.display = 'none';
+      forgotBlock.style.display = '';
+      btnShowForgot.classList.add('active');
+      btnShowLogin.classList.remove('active');
+      btnShowRegister.classList.remove('active');
     });
 
     function randomCaptcha(){
@@ -324,14 +363,11 @@
       const u = document.getElementById('regUsername').value.trim();
       const p = document.getElementById('regPassword').value;
       if(!e || !u || !p) return alert('Lengkapi semua field pendaftaran!');
-      // store demo user in localStorage (key by username)
       const userKey = 'user_' + u.toLowerCase();
       if(localStorage.getItem(userKey)) return alert('Username sudah terdaftar!');
       localStorage.setItem(userKey, JSON.stringify({email:e, username:u, password:p, balance:0}));
       alert('Registrasi berhasil! Silakan login.');
-      // switch to login
       btnShowLogin.click();
-      // fill login fields
       document.getElementById('loginEmail').value = e;
       document.getElementById('loginUsername').value = u;
     });
@@ -350,21 +386,43 @@
         return alert('Captcha salah!');
       }
 
-      // check local storage for user
       const userKey = 'user_' + u.toLowerCase();
       const stored = localStorage.getItem(userKey);
       if(stored){
         const data = JSON.parse(stored);
         if(data.password !== p) return alert('Password salah!');
-        // login success, load user info
+        // login success
         localStorage.setItem('auth_user', u.toLowerCase());
         localStorage.setItem('email', data.email);
         localStorage.setItem('username', data.username);
         localStorage.setItem('balance', data.balance || 0);
         onAppStart();
       } else {
-        // allow quick-create? or block
         return alert('Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
+      }
+    });
+
+    // Forgot password handler (simulation)
+    document.getElementById('btnForgot').addEventListener('click', ()=> {
+      const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+      if(!email) return alert('Masukkan email untuk reset!');
+      // search users
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('user_'));
+      let found = null;
+      for(const k of keys){
+        try {
+          const dat = JSON.parse(localStorage.getItem(k));
+          if(dat && dat.email && dat.email.toLowerCase() === email){
+            found = dat; break;
+          }
+        } catch(e){}
+      }
+      if(found) {
+        alert('Simulasi: Link reset password telah dikirim ke ' + email + ' (tidak benar-benar terkirim).');
+        // optionally show password (for demo) — but better not. We simulate only.
+        btnShowLogin.click();
+      } else {
+        alert('Alamat email tidak ditemukan.');
       }
     });
 
@@ -377,7 +435,7 @@
     }
 
     function showPage(targetId){
-      const pages = ['homePage','miningPage','walletPage','profilePage','authPage'];
+      const pages = ['authPage','homePage','miningPage','walletPage','profilePage'];
       const activeEl = document.querySelector('.page.active');
       const fromIdx = activeEl ? pages.indexOf(activeEl.id) : 0;
       const toIdx = pages.indexOf(targetId);
@@ -391,12 +449,11 @@
       const next = document.getElementById(targetId);
       next.classList.add('active');
 
-      // update tab highlighting
       document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === targetId));
     }
 
     /* -------------------------
-       MINING LOGIC
+       MINING LOGIC (fixed hashrate 150 H/s)
     ------------------------- */
     const progressFill = document.getElementById('progressFill');
     const unclaimedEl = document.getElementById('unclaimed');
@@ -411,7 +468,6 @@
       const rect = container.getBoundingClientRect();
       const spark = document.createElement('div');
       spark.className = 'spark';
-      // random near center
       const x = rect.width/2 + (Math.random()*120 - 60);
       const y = rect.height/2 + (Math.random()*40 - 10);
       spark.style.left = x + 'px';
@@ -427,19 +483,19 @@
       startBtn && (startBtn.style.display='none');
       stopBtn && (stopBtn.style.display='inline-block');
 
-      miningInterval = setInterval(()=> {
-        // increase hashrate
-        const h = Math.floor(200 + Math.random()*1200);
-        hashrateEl.innerText = h + ' H/s';
+      // set fixed hashrate
+      hashrateEl.innerText = '150 H/s';
 
-        // progress
+      miningInterval = setInterval(()=> {
+        // progress (fixed increment)
         let current = parseFloat(progressFill.dataset.val || '0');
-        current = Math.min(100, current + (1 + Math.random()*2.2));
+        current = Math.min(100, current + 1.6); // steady speed
         progressFill.style.width = current + '%';
         progressFill.dataset.val = current;
 
-        // unclaimed
-        unclaimed += 0.00001 + Math.random()*0.00006;
+        // unclaimed increases deterministically (based on hashrate)
+        // we'll simulate unclaimed increase proportional to progress step
+        unclaimed += 0.00002; // steady small increment per tick
         unclaimedEl.innerText = unclaimed.toFixed(6);
 
         // visual sparks
@@ -447,18 +503,17 @@
 
         // update UI numbers
         updateUI();
-        // when progress reaches 100, auto-move a small portion to wallet (simulate block)
+
+        // when progress reaches 100, auto-move a portion to wallet (simulate block)
         if(current >= 100){
-          // small auto-claim to balance (simulate payout)
-          const payout = unclaimed * 0.5;
+          const payout = unclaimed * 0.5; // half auto payout
           balance += payout;
           unclaimed = unclaimed - payout;
           progressFill.style.width = '0%';
           progressFill.dataset.val = '0';
-          // save
           localStorage.setItem('balance', balance.toFixed(6));
           updateUI();
-          toast('Auto payout '+payout.toFixed(6)+' KOT');
+          toast('Auto payout ' + payout.toFixed(6) + ' KOT');
         }
       }, 700);
     }
@@ -497,7 +552,7 @@
       el.textContent = msg;
       el.style.position = 'fixed';
       el.style.left = '50%';
-      el.style.bottom = '86px';
+      el.style.bottom = '110px';
       el.style.transform = 'translateX(-50%)';
       el.style.padding = '10px 16px';
       el.style.borderRadius = '10px';
@@ -530,10 +585,8 @@
         document.getElementById('profileEmail').innerText = email || '';
         document.getElementById('profileName').innerText = username || '';
         document.getElementById('headerUser').innerText = username || 'User';
-        // update UI numbers
         updateUI();
       } else {
-        // keep auth visible
         document.getElementById('authPage').classList.add('active');
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       }
@@ -554,11 +607,10 @@
       localStorage.removeItem('auth_user');
       localStorage.removeItem('username');
       localStorage.removeItem('email');
-      // refresh to show auth
       location.reload();
     }
 
-    /* quick demo: if no registered user exist, create demo account*/
+    /* quick demo: ensure at least one demo account exists */
     function ensureDemo(){
       const demoKey = 'user_aepuloh';
       if(!localStorage.getItem(demoKey)){
@@ -566,19 +618,12 @@
       }
     }
 
-    // quick demo login flow (buttonless)
     function demoAutoLogin(){
-      // if user already logged in skip
       if(localStorage.getItem('auth_user')) return;
-      // if a user exists in storage, do nothing; otherwise prompt demo
       const hasAnyUser = Object.keys(localStorage).some(k=>k.startsWith('user_'));
-      if(!hasAnyUser){
-        ensureDemo();
-      }
-      // ask user to use demo
+      if(!hasAnyUser) ensureDemo();
       setTimeout(()=> {
         if(confirm('Gunakan akun demo? Tekan OK untuk masuk (username: Aepuloh / pass: demo123)')) {
-          // login demo
           localStorage.setItem('auth_user', 'aepuloh');
           localStorage.setItem('username', 'Aepuloh');
           localStorage.setItem('email', 'airdropshunterid@gmail.com');
@@ -603,7 +648,7 @@
         t.addEventListener('click', onTabClick);
       });
 
-      // keyboard: Enter to login when auth shown
+      // keyboard: Enter to login/register when auth shown
       document.getElementById('loginBlock').addEventListener('keydown', (e)=>{
         if(e.key === 'Enter') document.getElementById('btnLogin').click();
       });
@@ -611,6 +656,13 @@
         if(e.key === 'Enter') document.getElementById('btnRegister').click();
       });
     });
+
+    // expose some functions for inline onclick usage
+    window.showPage = showPage;
+    window.startMining = startMining;
+    window.stopMining = stopMining;
+    window.claim = claim;
+    window.logout = logout;
   </script>
 </body>
 </html>
