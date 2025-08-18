@@ -3,32 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test App</title>
+  <title>Crypto Mining App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background:#0f0f1a; color:#fff; font-family:sans-serif; }
-    .glass { background:rgba(255,255,255,0.06); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); }
-    .profile-box { max-width:20rem; margin:auto; font-size:.85rem; }
-    .profile-row { display:flex; justify-content:space-between; padding:.4rem .75rem; margin-bottom:.5rem; background:rgba(255,255,255,0.05); border-radius:.5rem; }
-    .profile-value { max-width:11rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
+    body {
+      background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #000000);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .glow {
+      text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
+    }
+    .profile-box { width: 18rem; font-size: 0.85rem; }
+    .profile-row { display:flex; justify-content:space-between; margin-bottom:0.5rem; }
+    .profile-value { max-width: 10rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
   </style>
 </head>
 <body class="h-screen flex flex-col">
 
-  <!-- Login -->
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="flex flex-col items-center justify-center h-screen">
     <div class="glass rounded-xl p-6 w-80 text-center">
-      <h1 class="text-xl font-bold mb-4">Crypto Miner</h1>
+      <h1 class="text-2xl font-bold glow mb-4">Crypto Miner</h1>
+
       <input id="email" type="email" placeholder="Email" class="mb-2 w-full p-2 rounded text-black" />
       <input id="username" type="text" placeholder="Username" class="mb-2 w-full p-2 rounded text-black" />
-      <input id="password" type="password" placeholder="Password" class="mb-4 w-full p-2 rounded text-black" />
+      <input id="password" type="password" placeholder="Password" class="mb-2 w-full p-2 rounded text-black" />
+
+      <!-- Captcha -->
+      <div class="flex items-center justify-between bg-gray-800 text-white px-3 py-2 rounded mb-2">
+        <span id="captchaText" class="font-bold"></span>
+        <button onclick="generateCaptcha()" class="text-cyan-400">↻</button>
+      </div>
+      <input id="captchaInput" type="text" placeholder="Masukkan kode di atas" class="mb-4 w-full p-2 rounded text-black" />
+
       <button onclick="login()" class="bg-cyan-500 w-full py-2 rounded text-white">Login</button>
     </div>
   </div>
 
-  <!-- App -->
+  <!-- MAIN APP -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
-    <div id="homePage" class="flex-1 flex items-center justify-center">Home Page</div>
+    <!-- Home / Mining -->
+    <div id="homePage" class="flex-1 flex items-center justify-center">⛏️ Mining Page</div>
+
+    <!-- Wallet -->
+    <div id="walletPage" class="hidden flex-1 flex items-center justify-center">💰 Wallet Page</div>
+
+    <!-- Profile -->
     <div id="profilePage" class="hidden flex-1 flex items-center justify-center">
       <div class="glass rounded-xl p-4 profile-box">
         <h2 class="text-cyan-400 font-semibold text-center mb-3">Profile</h2>
@@ -38,39 +64,57 @@
       </div>
     </div>
 
-    <!-- Tab -->
+    <!-- Tab bar bawah -->
     <div class="glass flex justify-around py-3">
-      <button onclick="showPage('homePage')" class="text-cyan-400">🏠</button>
+      <button onclick="showPage('homePage')" class="text-cyan-400">⛏️</button>
+      <button onclick="showPage('walletPage')" class="text-cyan-400">💰</button>
       <button onclick="showPage('profilePage')" class="text-cyan-400">👤</button>
     </div>
   </div>
 
   <script>
+    let currentCaptcha = "";
+    function generateCaptcha(){
+      currentCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
+      document.getElementById("captchaText").innerText = currentCaptcha;
+    }
+    generateCaptcha();
+
     function login(){
       const email=document.getElementById("email").value;
       const username=document.getElementById("username").value;
       const pass=document.getElementById("password").value;
-      if(email && username && pass){
-        localStorage.setItem("email",email);
-        localStorage.setItem("username",username);
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("mainApp").classList.remove("hidden");
-        document.getElementById("profileEmail").innerText=email;
-        document.getElementById("profileUsername").innerText=username;
-      } else { alert("Lengkapi semua field!"); }
+      const captchaInput=document.getElementById("captchaInput").value;
+
+      if(!email || !username || !pass){ alert("Lengkapi semua field!"); return; }
+      if(captchaInput !== currentCaptcha){ alert("Captcha salah!"); return; }
+
+      // Simpan data
+      localStorage.setItem("email",email);
+      localStorage.setItem("username",username);
+
+      // Ganti screen
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+
+      // Isi profil
+      document.getElementById("profileEmail").innerText=email;
+      document.getElementById("profileUsername").innerText=username;
+
+      showPage('homePage');
     }
+
     function logout(){
-      localStorage.clear();
       document.getElementById("mainApp").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
+      generateCaptcha();
     }
-    function showPage(page){
-      ["homePage","profilePage"].forEach(id=>document.getElementById(id).classList.add("hidden"));
-      document.getElementById(page).classList.remove("hidden");
-      if(page==="profilePage"){
-        document.getElementById("profileEmail").innerText=localStorage.getItem("email")||"";
-        document.getElementById("profileUsername").innerText=localStorage.getItem("username")||"";
-      }
+
+    function showPage(pageId){
+      ["homePage","walletPage","profilePage"].forEach(id=>{
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById(pageId).classList.remove("hidden");
     }
   </script>
 </body>
