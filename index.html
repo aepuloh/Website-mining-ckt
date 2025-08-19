@@ -3,122 +3,711 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fire-Mining Debug</title>
+  <title>Fire-Mining — Full (Mining + Deposit/Withdraw + Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg1:#070d1a; --bg2:#071834;
+      --ml-blue:#7aa9ff; --ml-cyan:#00eaff; --ml-violet:#8b5cf6;
+      --glass: rgba(255,255,255,0.02); --stroke: rgba(255,255,255,0.06);
+    }
+    html,body{height:100%}
+    body{
+      margin:0; color:#e8f0ff; height:100vh; overflow:hidden;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(900px 450px at 10% 12%, rgba(122,169,255,.06), transparent 25%),
+        radial-gradient(800px 360px at 92% 88%, rgba(0,234,255,.05), transparent 30%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    .glass{ background:var(--glass); border:1px solid var(--stroke); backdrop-filter: blur(10px); border-radius:14px; box-shadow: 0 10px 30px rgba(0,0,0,.55); }
+    .app { display:flex; flex-direction:column; height:100%; }
+
+    /* pages */
+    .page{ position:absolute; inset:18px; border-radius:14px; overflow:auto; opacity:0; transform:translateY(8px) scale(.995); transition:transform .35s, opacity .3s; pointer-events:none; display:flex; align-items:center; justify-content:center; }
+    .page.active{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+
+    /* tabbar */
+    .tabbar{ position:fixed; left:50%; transform:translateX(-50%); bottom:22px; width:calc(100% - 40px); max-width:1100px; display:none; gap:8px; align-items:center; justify-content:center; padding:10px; background:rgba(2,6,23,.45); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.55); z-index:999; }
+    .tab{ padding:8px 12px; border-radius:10px; display:flex; gap:8px; align-items:center; cursor:pointer; transition:all .25s; color:rgba(255,255,255,.9);}
+    .tab.active{ background:linear-gradient(90deg, rgba(0,234,255,.09), rgba(123,104,238,.09)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,.5); }
+
+    .field{ width:100%; padding:.65rem .75rem; border-radius:10px; border:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.03); color:#eaf3ff; }
+    .btn{ padding:.6rem .9rem; border-radius:10px; border:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.04); cursor:pointer; }
+    .btn:hover{ filter:brightness(1.06); }
+    .btn-start{ background:linear-gradient(90deg, rgba(0,234,255,.18), rgba(139,92,246,.18)); border-color:rgba(0,234,255,.28); }
+    .btn-stop{ background:linear-gradient(90deg, rgba(255,0,82,.18), rgba(139,92,246,.18)); border-color:rgba(255,0,82,.28); }
+
+    /* mining visuals */
+    .rig-wrap{ position:relative; margin:14px auto 10px; width:320px; height:180px; }
+    .ring{ position:absolute; inset:0; margin:auto; width:140px; height:140px; border-radius:50%; border:6px solid var(--ml-violet); border-top:6px solid var(--ml-cyan); animation: spin 2s linear infinite; box-shadow:0 0 30px rgba(0,234,255,.18) inset; }
+    .gear{ position:absolute; left:50%; top:50%; width:80px; height:80px; transform:translate(-50%,-50%); border:6px solid var(--ml-blue); border-left-color:transparent; border-radius:50%; animation: spinReverse 3.4s linear infinite; box-shadow:0 6px 18px rgba(0,0,0,.6); }
+    .scanner{ position:absolute; left:10%; right:10%; top:12px; height:2px; background:linear-gradient(90deg, transparent, var(--ml-cyan), transparent); animation: scan 2.6s linear infinite; opacity:.9 }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+    @keyframes spinReverse{ to{ transform:translate(-50%,-50%) rotate(-360deg);} }
+    @keyframes scan{ 0%{ transform:translateY(0);} 100%{ transform:translateY(160px);} }
+
+    .grid-bg{ position:absolute; inset:0; pointer-events:none; opacity:.28; background:
+      radial-gradient(circle at 50% 50%, rgba(0,234,255,.12), transparent 40%),
+      linear-gradient(0deg, rgba(122,169,255,.04) 1px, transparent 1px); background-size:100% 40px; mask: radial-gradient(200px 120px at 50% 50%, black 40%, transparent 80%); filter: drop-shadow(0 0 12px rgba(122,169,255,.25)); }
+
+    .progress{ height:12px; background:#081a2b; border:1px solid rgba(255,255,255,.04); border-radius:10px; overflow:hidden; }
+    .progress > div{ height:100%; background:linear-gradient(90deg, var(--ml-cyan), var(--ml-violet)); width:0%; transition: width .25s ease; }
+
+    /* toast */
+    .toast { position: fixed; top: 20px; right: 20px; min-width: 220px; max-width: 360px; padding: 12px 16px; border-radius: 10px; font-size: 14px; z-index: 2000; display: none; color: #fff; }
+    .toast.success { background: linear-gradient(90deg,#00c851,#007e33); }
+    .toast.error   { background: linear-gradient(90deg,#ff4444,#cc0000); }
+
+    /* password toggle */
+    .pass-wrap { position: relative; display: flex; align-items: center; }
+    .pass-wrap input { flex: 1; padding-right: 40px; }
+    .pass-toggle { position: absolute; right: 10px; cursor: pointer; font-size: 16px; opacity: 0.8; user-select:none; }
+
+    /* small helpers */
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    table td, table th{ border-bottom:1px solid rgba(255,255,255,.03); }
+  </style>
 </head>
 <body>
-  <div class="p-6 max-w-md mx-auto">
-    <h2 class="text-lg font-semibold mb-3">Login / Register Debug</h2>
+  <canvas id="stars" style="position:fixed; inset:0; z-index:-1;"></canvas>
 
-    <!-- LOGIN -->
-    <div id="loginBlock">
-      <input id="loginEmail" class="border p-2 w-full mb-2" type="email" placeholder="Email" />
-      <input id="loginUsername" class="border p-2 w-full mb-2" type="text" placeholder="Username" />
-      <input id="loginPassword" class="border p-2 w-full mb-2" type="password" placeholder="Password" />
-      <button id="btnLogin" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
-    </div>
+  <div id="toast" class="toast"></div>
 
-    <!-- REGISTER -->
-    <div id="registerBlock" class="mt-6">
-      <input id="regEmail" class="border p-2 w-full mb-2" type="email" placeholder="Email" />
-      <input id="regUsername" class="border p-2 w-full mb-2" type="text" placeholder="Username" />
-      <input id="regPassword" class="border p-2 w-full mb-2" type="password" placeholder="Password" />
-      <button id="btnRegister" class="bg-green-500 text-white px-4 py-2 rounded">Register</button>
-    </div>
+  <div class="app">
+    <header class="app-header flex items-center justify-between p-4">
+      <div class="logo flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" fill="#00eaff"/></svg>
+        <h1 class="font-bold">Fire-Mining</h1>
+      </div>
+      <div id="headerUser" class="text-sm opacity-80">Guest</div>
+    </header>
+
+    <main class="pages">
+      <!-- AUTH PAGE -->
+      <section id="authPage" class="page active">
+        <div class="glass p-6 w-[420px] max-w-[92vw]">
+          <h2 class="text-lg font-semibold mb-3 text-center">Masuk / Daftar</h2>
+          <div class="flex gap-3 mb-4">
+            <button id="btnShowLogin" class="btn w-full">Login</button>
+            <button id="btnShowRegister" class="btn w-full">Register</button>
+          </div>
+
+          <!-- Login -->
+          <div id="loginBlock">
+            <input id="loginUsername" class="field mb-2" type="text" placeholder="Username" />
+            <div class="pass-wrap mb-2">
+              <input id="loginPassword" class="field" type="password" placeholder="Kata sandi" />
+              <span class="pass-toggle" onclick="togglePass('loginPassword', this)">👁️</span>
+            </div>
+            <button id="btnLogin" class="btn btn-start w-full mt-3">Login</button>
+          </div>
+
+          <!-- Register -->
+          <div id="registerBlock" style="display:none;">
+            <input id="regEmail" class="field mb-2" type="email" placeholder="Email" />
+            <input id="regUsername" class="field mb-2" type="text" placeholder="Username" />
+            <div class="pass-wrap mb-2">
+              <input id="regPassword" class="field" type="password" placeholder="Kata sandi (min 6)" />
+              <span class="pass-toggle" onclick="togglePass('regPassword', this)">👁️</span>
+            </div>
+            <button id="btnRegister" class="btn w-full mt-2">Daftar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOME -->
+      <section id="homePage" class="page">
+        <div class="glass p-6 w-full max-w-xl text-center">
+          <h3 class="text-lg font-semibold mb-2">Iklan</h3>
+          <p class="text-sm opacity-70 mb-4">Klik ikon untuk memutar iklan.</p>
+          <div class="flex items-center justify-center mb-4">
+            <button id="openAd" class="btn btn-start flex items-center gap-3">▶️ Buka Iklan</button>
+          </div>
+          <div id="adModal" class="modal" style="display:none;">
+            <div class="modal-card glass p-2 relative">
+              <button id="closeAd" class="btn btn-stop absolute right-3 top-3">✖</button>
+              <iframe id="adFrame" src="" style="width:100%;height:100%;border:none;border-radius:12px;"></iframe>
+            </div>
+          </div>
+          <p class="text-xs opacity-60 mt-4">Ringkasan saldo di tab <b>Wallet</b></p>
+        </div>
+      </section>
+
+      <!-- MINING -->
+      <section id="miningPage" class="page">
+        <div class="glass p-6 w-full max-w-xl">
+          <h3 class="text-lg font-semibold mb-2">Mining</h3>
+
+          <div class="rig-wrap">
+            <div class="grid-bg"></div>
+            <div class="ring"></div>
+            <div class="gear"></div>
+            <div class="scanner"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-sm mb-2">
+            <div>Hashrate: <span class="mono" id="hashrate">150 H/s</span></div>
+            <div>Sisa waktu: <span class="mono" id="eta">—</span></div>
+          </div>
+
+          <div class="progress mb-2"><div id="progressFill"></div></div>
+          <p class="text-sm">Unclaimed: <span id="unclaimed">0.000000</span> KOT</p>
+
+          <div class="mt-3 flex gap-2">
+            <button id="startBtn" class="btn btn-start" onclick="startMining()">Start 24 Jam</button>
+            <button id="claimBtn" class="btn hidden" onclick="claim()">Claim</button>
+          </div>
+          <p id="miningNote" class="text-xs mt-2 opacity-70">Klik Start untuk memulai mining 24 jam. Tidak bisa di-stop.</p>
+        </div>
+      </section>
+
+      <!-- WALLET -->
+      <section id="walletPage" class="page">
+        <div class="glass p-6 w-full max-w-xl">
+          <h3 class="text-lg font-semibold mb-2">Wallet</h3>
+
+          <div class="grid gap-3">
+            <div class="glass p-3">
+              <div class="text-sm opacity-80">Saldo</div>
+              <div id="walletBalance" class="text-2xl mono">0.000000 KOT</div>
+            </div>
+
+            <div class="glass p-3">
+              <h4 class="font-semibold mb-2">Deposit</h4>
+              <div class="text-sm opacity-80 mb-1">USDT (BEP20)</div>
+              <div class="mono text-xs bg-black/30 p-2 rounded mb-2 select-all" id="depAddr">0xA1b2C3d4E5f6A7b8C9d0E1f2A3b4C5d6E7f8A9b0</div>
+              <div class="flex gap-2 mb-2">
+                <button class="btn btn-start" onclick="copyAddr()">Salin Alamat</button>
+                <button class="btn" onclick="openDepositModal()">Saya sudah transfer</button>
+              </div>
+              <div id="depositModal" style="display:none;" class="glass p-3">
+                <div class="mb-2 text-sm">Masukkan jumlah transfer (KOT-equivalent):</div>
+                <input id="depAmount" class="field mb-2" placeholder="Contoh: 10.5" />
+                <input id="depNote" class="field mb-2" placeholder="Catatan (opsional)" />
+                <div class="flex gap-2">
+                  <button class="btn btn-start" onclick="requestDeposit()">Kirim Request</button>
+                  <button class="btn" onclick="closeDepositModal()">Batal</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass p-3">
+              <h4 class="font-semibold mb-2">Withdraw</h4>
+              <div class="text-sm opacity-80 mb-1">Tarik ke alamat BEP20 Anda</div>
+              <input id="wdAddr" class="field mb-2" placeholder="Alamat penerima (BEP20)" />
+              <input id="wdAmt" class="field mb-2" placeholder="Jumlah (mis. 1.25)" />
+              <div class="flex gap-2">
+                <button class="btn btn-start" onclick="requestWithdraw()">Minta Withdraw</button>
+              </div>
+              <p class="text-xs opacity-60 mt-2">Withdraw harus disetujui admin.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="profilePage" class="page">
+        <div class="glass p-6 w-full max-w-xl">
+          <h3 class="text-lg font-semibold mb-3">Profile</h3>
+          <div id="profileEmail" class="mb-1 text-sm opacity-90"></div>
+          <div id="profileName" class="mb-4 text-sm opacity-90"></div>
+
+          <h4 class="font-semibold mb-2">Histori Mining (harian)</h4>
+          <div class="glass p-2 overflow-auto mb-3">
+            <table class="w-full text-sm">
+              <thead class="opacity-80"><tr><th class="text-left p-2">Tanggal</th><th class="text-right p-2">Jumlah (KOT)</th></tr></thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+
+          <h4 class="font-semibold mb-2">Request Anda</h4>
+          <div class="glass p-2">
+            <div class="text-sm mb-2">Deposit & Withdraw recent (status realtime)</div>
+            <div id="myRequests"></div>
+          </div>
+
+          <button onclick="logout()" class="btn btn-stop w-full mt-4">Logout</button>
+        </div>
+      </section>
+
+      <!-- ADMIN -->
+      <section id="adminPage" class="page">
+        <div class="glass p-6 w-full max-w-4xl">
+          <h3 class="text-lg font-semibold mb-3">Pantauan Admin</h3>
+
+          <div class="grid gap-3">
+            <div class="glass p-3 overflow-auto">
+              <h4 class="font-semibold mb-2">Daftar User</h4>
+              <table class="w-full text-sm"><thead class="opacity-80"><tr><th>User</th><th>Email</th><th class="text-right">Saldo</th><th>Status</th><th>Mulai</th><th class="text-right">Total Claim</th></tr></thead>
+              <tbody id="adminBody"></tbody></table>
+            </div>
+
+            <div class="glass p-3 overflow-auto">
+              <h4 class="font-semibold mb-2">Pending Deposits</h4>
+              <table class="w-full text-sm"><thead><tr><th>User</th><th>Jumlah</th><th>Catatan</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody id="depositsBody"></tbody></table>
+            </div>
+
+            <div class="glass p-3 overflow-auto">
+              <h4 class="font-semibold mb-2">Pending Withdraws</h4>
+              <table class="w-full text-sm"><thead><tr><th>User</th><th>Jumlah</th><th>Addr</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody id="withdrawsBody"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav id="tabbar" class="tabbar">
+      <div class="tab active" data-page="homePage" onclick="onTabClick(event)">🏠 Home</div>
+      <div class="tab" data-page="miningPage" onclick="onTabClick(event)">⛏️ Mining</div>
+      <div class="tab" data-page="walletPage" onclick="onTabClick(event)">💰 Wallet</div>
+      <div class="tab" data-page="profilePage" onclick="onTabClick(event)">👤 Profile</div>
+      <div id="adminTab" class="tab hidden" data-page="adminPage" onclick="onTabClick(event)">🛡️ Admin</div>
+    </nav>
   </div>
 
-  <!-- Firebase v9 -->
+  <!-- Firebase v9 modular (type=module) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import {
+      getDatabase, ref, set, update, get, onValue, push
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    // ======== GANTI DENGAN CONFIG PROJECT ANDA ========
+    // ========== GANTI dengan firebaseConfig project Anda ==========
     const firebaseConfig = {
-  apiKey: "AIzaSyCc4ix1uGCaE-rsyM6Lg3jo6SzVjbXYCmw",
-  authDomain: "crypto-mining-d3811.firebaseapp.com",
-  databaseURL: "https://crypto-mining-d3811-default-rtdb.firebaseio.com",
-  projectId: "crypto-mining-d3811",
-  storageBucket: "crypto-mining-d3811.firebasestorage.app",
-  messagingSenderId: "1068882455445",
-  appId: "1:1068882455445:web:037fead0336694428f649c"
-};
-    // ===============================================
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "YOUR_APP_ID"
+    };
+    // =============================================================
 
+    // Init
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const db  = getDatabase(app);
 
-    // ===== Register =====
-    document.getElementById('btnRegister').addEventListener('click', async ()=>{
-      const email = document.getElementById('regEmail').value.trim();
-      const username = document.getElementById('regUsername').value.trim();
-      const password = document.getElementById('regPassword').value;
+    // Constants
+    const DUR = 24*60*60*1000;
+    const REWARD_PER_24H = 1;
+    const HASHRATE_BASE = 150;
+    const AD_URL = "https://iklan-giga-hub.vercel.app/";
 
-      console.log("👉 Register ditekan:", email, username);
+    // Helpers
+    const $ = sel => document.querySelector(sel);
+    const authKey = 'auth_user';
+    function getAuth(){ return localStorage.getItem(authKey) || ''; }
+    function setAuth(u){ localStorage.setItem(authKey, u); }
+    function clearAuth(){ localStorage.removeItem(authKey); }
+    function showToast(msg, type='success'){ const t = document.getElementById('toast'); t.innerText = msg; t.className = 'toast '+type; t.style.display='block'; setTimeout(()=>t.style.display='none', 2800); }
+    function formatKOT(n){ return (n||0).toFixed(6); }
+    function formatDate(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+    function msToHuman(ms){ const s=Math.ceil(ms/1000); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60; const p=n=>String(n).padStart(2,'0'); return `${p(h)}:${p(m)}:${p(ss)}`; }
 
-      if(!email || !username || !password) {
-        alert("Lengkapi semua field!");
-        return;
-      }
+    // UI toggle pass
+    window.togglePass = (id, el)=>{ const ip=document.getElementById(id); if(!ip) return; if(ip.type==='password'){ ip.type='text'; el.innerText='🙈'; } else { ip.type='password'; el.innerText='👁️'; } };
 
-      try {
-        const userRef = ref(db, 'users/'+username);
+    // Nav
+    window.onTabClick = (e)=>showPage(e.currentTarget.dataset.page);
+    function showPage(id){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===id));
+      if(id==='miningPage') checkMiningStatus();
+      if(id==='profilePage') renderHistory();
+      if(id==='adminPage') loadAdminData();
+    }
+
+    // Ads modal
+    $('#openAd').addEventListener('click', ()=>{ $('#adFrame').src = AD_URL; $('#adModal').style.display='block'; });
+    $('#closeAd').addEventListener('click', ()=>{ $('#adModal').style.display='none'; $('#adFrame').src=''; });
+
+    // ---------- Auth (register/login simplified) ----------
+    $('#btnShowLogin').addEventListener('click', ()=>{ $('#loginBlock').style.display=''; $('#registerBlock').style.display='none'; });
+    $('#btnShowRegister').addEventListener('click', ()=>{ $('#loginBlock').style.display='none'; $('#registerBlock').style.display=''; });
+
+    $('#btnRegister').addEventListener('click', async ()=>{
+      let username = $('#regUsername').value.trim().toLowerCase();
+      const email = $('#regEmail').value.trim();
+      const password = $('#regPassword').value.trim();
+      if(!username||!email||!password) return showToast('Lengkapi semua field!', 'error');
+      if(password.length < 6) return showToast('Password minimal 6 karakter', 'error');
+
+      try{
+        const userRef = ref(db, 'users/' + username);
         const snap = await get(userRef);
-        if(snap.exists()) {
-          console.warn("❌ Username sudah ada:", username);
-          alert("Username sudah terdaftar!");
-          return;
-        }
+        if(snap.exists()) return showToast('Username sudah terdaftar', 'error');
 
-        await set(userRef, {
-          email, username, password, balance:0, miningActive:false,
-          miningStartTime:0, history:[], totalClaim:0
-        });
-
-        console.log("✅ Registrasi berhasil:", username);
-        alert("Registrasi berhasil! Silakan login.");
-      } catch (err) {
-        console.error("🔥 Error register:", err);
-        alert("Error register: "+err.message);
+        await set(userRef, { email, username, password, balance:0, miningActive:false, miningStartTime:0, history:[], totalClaim:0 });
+        showToast('Registrasi berhasil! Silakan login','success');
+        $('#btnShowLogin').click();
+      } catch(e){
+        console.error('register err', e); showToast('Gagal register: '+e.message, 'error');
       }
     });
 
-    // ===== Login =====
-    document.getElementById('btnLogin').addEventListener('click', async ()=>{
-      console.log("👉 Tombol Login ditekan");
+    $('#btnLogin').addEventListener('click', async ()=>{
+      const username = $('#loginUsername').value.trim().toLowerCase();
+      const password = $('#loginPassword').value.trim();
+      if(!username||!password) return showToast('Isi username & password', 'error');
 
-      const email = document.getElementById('loginEmail').value.trim();
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value;
-
-      if(!email || !username || !password) {
-        alert("Lengkapi semua field!");
-        return;
-      }
-
-      try {
-        const snap = await get(ref(db, 'users/'+username));
-        console.log("🔎 Hasil query user:", snap.exists(), snap.val());
-
-        if(!snap.exists()) {
-          alert("Akun tidak ditemukan!");
-          return;
-        }
-
+      try{
+        const snap = await get(ref(db, 'users/' + username));
+        console.log('login snap', snap.exists(), snap.val());
+        if(!snap.exists()) return showToast('Akun tidak ditemukan','error');
         const user = snap.val();
-        if(user.password !== password) {
-          console.warn("❌ Password salah, input:", password, "stored:", user.password);
-          alert("Password salah!");
-          return;
-        }
+        if(user.password !== password) return showToast('Password salah','error');
 
-        console.log("✅ Login sukses:", username);
-        alert("Login sukses, selamat datang "+username);
-
-      } catch (err) {
-        console.error("🔥 Error login:", err);
-        alert("Error login: "+err.message);
+        setAuth(username);
+        showToast('Login sukses. Selamat datang '+username,'success');
+        bootstrapAfterLogin(username);
+      } catch(e){
+        console.error('login err', e); showToast('Login error: '+e.message,'error');
       }
     });
+
+    window.logout = ()=>{ clearAuth(); location.reload(); };
+
+    // ---------- Listen current user (realtime) ----------
+    let currentUser = null;
+    let unsubscribeUser = null;
+    function listenUser(username){
+      if(unsubscribeUser) unsubscribeUser();
+      const r = ref(db, 'users/' + username);
+      // onValue returns unsubscribe function when using modular v9? We'll emulate with onValue and store reference
+      const unsub = onValue(r, (snap)=>{
+        if(snap.exists()){
+          currentUser = snap.val();
+          updateUI();
+        } else { currentUser = null; }
+      });
+      unsubscribeUser = ()=>{ unsub(); };
+    }
+
+    function bootstrapAfterLogin(username){
+      $('#authPage').classList.remove('active');
+      $('#homePage').classList.add('active');
+      document.getElementById('tabbar').style.display='flex';
+      listenUser(username);
+      // subscribe to user's requests
+      listenMyRequests(username);
+      // if admin show admin tab
+      onValue(ref(db, 'users/' + username), snap=>{
+        const u = snap.val();
+        if(u && (u.username||'').toLowerCase() === 'admin') $('#adminTab').classList.remove('hidden'); else $('#adminTab').classList.add('hidden');
+      });
+    }
+
+    // ---------- Mining core ----------
+    window.startMining = async function(){
+      if(!currentUser) return showToast('Login dulu','error');
+      if(currentUser.miningActive) return showToast('Mining sudah jalan','error');
+      await set(ref(db, 'users/' + currentUser.username), { ...currentUser, miningActive:true, miningStartTime: Date.now() });
+      showToast('Mining dimulai','success');
+      checkMiningStatus();
+    };
+
+    function timeLeft(){
+      if(!currentUser || !currentUser.miningActive) return DUR;
+      const elapsed = Date.now() - (currentUser.miningStartTime||0);
+      return Math.max(0, DUR - elapsed);
+    }
+    function calcUnclaimed(){
+      if(!currentUser || !currentUser.miningActive) return 0;
+      const elapsed = Math.min(DUR, Math.max(0, Date.now() - (currentUser.miningStartTime||0)));
+      return (elapsed / DUR) * REWARD_PER_24H;
+    }
+
+    // show fluctuating hashrate
+    function randomHashrate(){
+      const v = HASHRATE_BASE + (Math.random()*8 - 4); // +/- 4
+      return Math.max(120, v.toFixed(1));
+    }
+
+    let rafId = null;
+    function tickProgress(){
+      if(!currentUser){ if(rafId) cancelAnimationFrame(rafId), rafId=null; return; }
+      const left = timeLeft();
+      const elapsed = DUR - left;
+      const pct = (elapsed / DUR) * 100;
+      const earned = calcUnclaimed();
+
+      $('#hashrate').innerText = randomHashrate() + ' H/s';
+      $('#eta').innerText = left>0 ? msToHuman(left) : 'Selesai';
+      $('#progressFill').style.width = pct.toFixed(2) + '%';
+      $('#unclaimed').innerText = formatKOT(earned);
+
+      if(currentUser.miningActive){
+        if(left<=0){
+          $('#startBtn').classList.add('hidden');
+          $('#claimBtn').classList.remove('hidden');
+          $('#miningNote').innerText = '✅ Mining selesai, silakan Claim.';
+          if(rafId) cancelAnimationFrame(rafId), rafId=null; return;
+        } else {
+          $('#startBtn').classList.add('hidden');
+          $('#claimBtn').classList.add('hidden');
+          $('#miningNote').innerText = '⛏️ Mining berjalan...';
+        }
+      } else {
+        $('#startBtn').classList.remove('hidden');
+        $('#claimBtn').classList.add('hidden');
+        $('#miningNote').innerText = 'Klik Start untuk memulai mining 24 jam. Tidak bisa di-stop.';
+      }
+      rafId = requestAnimationFrame(tickProgress);
+    }
+
+    function checkMiningStatus(){
+      if(!currentUser) return;
+      if(!rafId) tickProgress();
+    }
+
+    window.claim = async function(){
+      if(!currentUser || !currentUser.miningActive) return showToast('Tidak ada mining aktif','error');
+      const left = timeLeft();
+      if(left>0) return showToast('Mining belum selesai','error');
+
+      const reward = REWARD_PER_24H;
+      const newBal = (currentUser.balance||0) + reward;
+      const newHist = [{ ts: Date.now(), amount: reward }, ...(currentUser.history || [])];
+      const newTotal = (currentUser.totalClaim||0) + reward;
+
+      await update(ref(db, 'users/' + currentUser.username), {
+        balance: newBal,
+        history: newHist,
+        totalClaim: newTotal,
+        miningActive: false,
+        miningStartTime: 0
+      });
+      showToast('Claim berhasil: +' + formatKOT(reward) + ' KOT', 'success');
+    };
+
+    // ---------- UI update ----------
+    function updateUI(){
+      if(!currentUser) return;
+      $('#headerUser').innerText = currentUser.username || 'Guest';
+      $('#walletBalance').innerText = formatKOT(currentUser.balance||0) + ' KOT';
+      $('#profileEmail').innerText = 'Email: ' + (currentUser.email||'-');
+      $('#profileName').innerText  = 'Username: ' + (currentUser.username||'-');
+
+      // mining buttons state
+      checkMiningStatus();
+    }
+
+    function renderHistory(){
+      if(!currentUser) return;
+      const body = $('#historyBody'); body.innerHTML = '';
+      (currentUser.history||[]).forEach(item=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-2">${formatDate(item.ts)}</td><td class="p-2 text-right mono">${formatKOT(item.amount)}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    // ---------- Deposit / Withdraw (requests) ----------
+    function openDepositModal(){ $('#depositModal').style.display='block'; $('#depAmount').value=''; $('#depNote').value=''; }
+    function closeDepositModal(){ $('#depositModal').style.display='none'; }
+
+    async function requestDeposit(){
+      if(!currentUser) return showToast('Login dulu','error');
+      const amount = parseFloat($('#depAmount').value);
+      const note = $('#depNote').value.trim();
+      if(!amount || amount <= 0) return showToast('Masukkan jumlah yang valid','error');
+
+      const p = push(ref(db, 'deposits'));
+      const id = p.key;
+      await set(ref(db, 'deposits/' + id), {
+        id, user: currentUser.username, amount, note, status: 'pending', ts: Date.now()
+      });
+      closeDepositModal();
+      showToast('Request deposit terkirim. Menunggu verifikasi admin','success');
+    }
+
+    async function requestWithdraw(){
+      if(!currentUser) return showToast('Login dulu','error');
+      const addr = $('#wdAddr').value.trim();
+      const amt = parseFloat($('#wdAmt').value);
+      if(!addr) return showToast('Masukkan alamat withdraw','error');
+      if(!amt || amt <= 0) return showToast('Masukkan jumlah withdraw valid','error');
+      if((currentUser.balance||0) < amt) return showToast('Saldo tidak cukup','error');
+
+      const p = push(ref(db, 'withdraws'));
+      const id = p.key;
+      await set(ref(db, 'withdraws/' + id), {
+        id, user: currentUser.username, amount: amt, address: addr, status:'pending', ts: Date.now()
+      });
+      showToast('Request withdraw terkirim. Menunggu admin','success');
+    }
+
+    // show my requests on profile
+    function listenMyRequests(username){
+      // deposits
+      onValue(ref(db, 'deposits'), snap=>{
+        const all = snap.val() || {};
+        const cont = document.getElementById('myRequests');
+        cont.innerHTML = '';
+        Object.keys(all).reverse().forEach(k=>{
+          const d = all[k];
+          if(d.user === username){
+            const el = document.createElement('div');
+            el.className = 'p-2 mb-1';
+            el.style.borderBottom = '1px solid rgba(255,255,255,.03)';
+            el.innerHTML = `<div><b>Deposit</b> ${formatKOT(d.amount)} — ${d.status} <span class="text-xs opacity-60">(${new Date(d.ts).toLocaleString()})</span></div>`;
+            cont.appendChild(el);
+          }
+        });
+        // withdraws
+        onValue(ref(db, 'withdraws'), snap2=>{
+          const allw = snap2.val() || {};
+          Object.keys(allw).reverse().forEach(k=>{
+            const w = allw[k];
+            if(w.user === username){
+              const el = document.createElement('div');
+              el.className = 'p-2 mb-1';
+              el.style.borderBottom = '1px solid rgba(255,255,255,.03)';
+              el.innerHTML = `<div><b>Withdraw</b> ${formatKOT(w.amount)} — ${w.status} <span class="text-xs opacity-60">(${new Date(w.ts).toLocaleString()})</span></div>`;
+              cont.appendChild(el);
+            }
+          });
+        }, { onlyOnce: false });
+      }, { onlyOnce: false });
+    }
+
+    // ---------- Admin: load pending and users ----------
+    async function loadAdminData(){
+      // users
+      onValue(ref(db, 'users'), snap=>{
+        const all = snap.val() || {};
+        const tbody = $('#adminBody');
+        tbody.innerHTML = '';
+        Object.keys(all).forEach(k=>{
+          const u = all[k];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-2">${u.username||'-'}</td><td class="p-2">${u.email||'-'}</td><td class="p-2 text-right mono">${formatKOT(u.balance||0)}</td><td class="p-2">${u.miningActive? 'Active':'Idle'}</td><td class="p-2">${u.miningStartTime? new Date(u.miningStartTime).toLocaleString() : '-'}</td><td class="p-2 text-right mono">${formatKOT(u.totalClaim||0)}</td>`;
+          tbody.appendChild(tr);
+        });
+      });
+
+      // deposits pending
+      onValue(ref(db, 'deposits'), snap=>{
+        const all = snap.val() || {};
+        const dbody = $('#depositsBody'); dbody.innerHTML = '';
+        Object.keys(all).forEach(k=>{
+          const d = all[k];
+          if(d.status === 'pending'){
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="p-2">${d.user}</td><td class="p-2 mono">${formatKOT(d.amount)}</td><td class="p-2">${d.note||'-'}</td><td class="p-2">${new Date(d.ts).toLocaleString()}</td>
+              <td class="p-2"><button class="btn btn-start" onclick="approveDeposit('${d.id}')">Approve</button> <button class="btn" onclick="rejectDeposit('${d.id}')">Reject</button></td>`;
+            dbody.appendChild(tr);
+          }
+        });
+      });
+
+      // withdraws pending
+      onValue(ref(db, 'withdraws'), snap=>{
+        const all = snap.val() || {};
+        const wbody = $('#withdrawsBody'); wbody.innerHTML = '';
+        Object.keys(all).forEach(k=>{
+          const w = all[k];
+          if(w.status === 'pending'){
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="p-2">${w.user}</td><td class="p-2 mono">${formatKOT(w.amount)}</td><td class="p-2">${w.address}</td><td class="p-2">${new Date(w.ts).toLocaleString()}</td>
+              <td class="p-2"><button class="btn btn-start" onclick="approveWithdraw('${w.id}')">Approve</button> <button class="btn" onclick="rejectWithdraw('${w.id}')">Reject</button></td>`;
+            wbody.appendChild(tr);
+          }
+        });
+      });
+    }
+
+    // Admin actions
+    async function approveDeposit(id){
+      const snap = await get(ref(db, 'deposits/' + id));
+      if(!snap.exists()) return showToast('Deposit tidak ditemukan','error');
+      const d = snap.val();
+      if(d.status !== 'pending') return showToast('Deposit bukan pending','error');
+
+      // add to user balance
+      const userSnap = await get(ref(db, 'users/' + d.user));
+      if(!userSnap.exists()) return showToast('User tidak ditemukan','error');
+      const user = userSnap.val();
+      const newBal = (user.balance||0) + (Number(d.amount) || 0);
+      const newHist = [{ ts: Date.now(), amount: Number(d.amount) || 0 }, ...(user.history || [])];
+      await update(ref(db, 'users/' + d.user), { balance:newBal, history:newHist });
+
+      // mark deposit approved
+      await update(ref(db, 'deposits/' + id), { status: 'approved', adminTs: Date.now() });
+      showToast('Deposit approved dan saldo diupdate','success');
+    }
+
+    async function rejectDeposit(id){
+      await update(ref(db, 'deposits/' + id), { status: 'rejected', adminTs: Date.now() });
+      showToast('Deposit direject','success');
+    }
+
+    async function approveWithdraw(id){
+      const snap = await get(ref(db, 'withdraws/' + id));
+      if(!snap.exists()) return showToast('Withdraw tidak ditemukan','error');
+      const w = snap.val();
+      if(w.status !== 'pending') return showToast('Withdraw bukan pending','error');
+
+      const userSnap = await get(ref(db, 'users/' + w.user));
+      if(!userSnap.exists()) return showToast('User tidak ditemukan','error');
+      const user = userSnap.val();
+      if((user.balance||0) < Number(w.amount)) return showToast('Saldo user tidak cukup','error');
+
+      const newBal = (user.balance||0) - Number(w.amount);
+      await update(ref(db, 'users/' + w.user), { balance: newBal, history: [{ ts: Date.now(), amount: -Number(w.amount) }, ...(user.history||[])] });
+
+      await update(ref(db, 'withdraws/' + id), { status: 'approved', adminTs: Date.now() });
+      showToast('Withdraw approved, saldo dikurangi','success');
+
+      // Note: For real automated payout, you must use a backend service to send on-chain transactions.
+    }
+
+    async function rejectWithdraw(id){
+      await update(ref(db, 'withdraws/' + id), { status: 'rejected', adminTs: Date.now() });
+      showToast('Withdraw direject','success');
+    }
+
+    // ---------- small helpers ----------
+    window.copyAddr = ()=>{ const txt = $('#depAddr').innerText.trim(); navigator.clipboard.writeText(txt).then(()=>showToast('Alamat disalin','success')); };
+
+    // ---------- Starfield ----------
+    (function stars(){
+      const c = document.getElementById('stars'); const ctx = c.getContext('2d');
+      function resize(){ c.width = innerWidth; c.height = innerHeight; }
+      window.addEventListener('resize', resize); resize();
+      const N=110; const arr=[];
+      for(let i=0;i<N;i++) arr.push({ x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*1.6+0.2, v:(Math.random()*0.6+0.2) });
+      (function loop(){
+        ctx.clearRect(0,0,c.width,c.height);
+        for(const s of arr){
+          ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+          ctx.fillStyle = `rgba(122,169,255,${0.2+Math.random()*0.4})`; ctx.fill();
+          s.y += s.v; if(s.y>c.height){ s.y=0; s.x=Math.random()*c.width; }
+        }
+        requestAnimationFrame(loop);
+      })();
+    })();
+
+    // ---------- Bootstrap ----------
+    function onAppStart(){
+      const u = getAuth();
+      if(u){
+        $('#authPage').classList.remove('active');
+        $('#homePage').classList.add('active');
+        document.getElementById('tabbar').style.display='flex';
+        listenUser(u);
+        listenMyRequests(u);
+      } else {
+        $('#authPage').classList.add('active');
+        document.getElementById('tabbar').style.display='none';
+      }
+    }
+    window.addEventListener('load', onAppStart);
+
   </script>
 </body>
 </html>
